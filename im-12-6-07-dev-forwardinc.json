@@ -1,0 +1,774 @@
+{
+  "id": "im-12-6-07-dev-forwardinc",
+  "name": "CA Identity Manager 12.6.07.dev ForwardInc",
+  "replicationControllerList": {
+    "items": [
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "IM Database Replication Controller"
+          },
+          "labels": {
+            "ca.com/im": "database"
+          },
+          "name": "database-controller",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "ca.com/im": "database"
+          },
+          "template": {
+            "metadata": {
+              "annotations": {
+                "description": "IM Database Pod"
+              },
+              "labels": {
+                "ca.com/im": "database"
+              },
+              "name": "database",
+              "namespace": "im-12-6-07-dev-forwardinc"
+            },
+            "spec": {
+              "containers": [
+                {
+                  "env": [
+                    {
+                      "name": "DESTINATION",
+                      "value": "/solution"
+                    },
+                    {
+                      "name": "SOURCE",
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
+                  "name": "configuration",
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                },
+                {
+                  "env": [
+                    {
+                      "name": "CONFIG",
+                      "value": "forwardinc/mysql"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/imag/mysql:latest",
+                  "name": "database",
+                  "ports": [
+                    {
+                      "containerPort": 3306
+                    }
+                  ],
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                }
+              ],
+              "dnsPolicy": "ClusterFirst",
+              "restartPolicy": "Always",
+              "volumes": [
+                {
+                  "name": "configuration",
+                  "source": {
+                    "emptyDir": {}
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "IM Server Replication Controller"
+          },
+          "labels": {
+            "ca.com/im": "im-server"
+          },
+          "name": "im-server-controller",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "ca.com/im": "im-server"
+          },
+          "template": {
+            "metadata": {
+              "annotations": {
+                "description": "IM Server Pod"
+              },
+              "labels": {
+                "ca.com/im": "im-server"
+              },
+              "name": "im-server",
+              "namespace": "im-12-6-07-dev-forwardinc"
+            },
+            "spec": {
+              "containers": [
+                {
+                  "env": [
+                    {
+                      "name": "DESTINATION",
+                      "value": "/solution"
+                    },
+                    {
+                      "name": "SOURCE",
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
+                  "name": "configuration",
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                },
+                {
+                  "env": [
+                    {
+                      "name": "CONFIG",
+                      "value": "forwardinc/appsrv"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/imag/im-server:latest",
+                  "livenessProbe": {
+                    "httpGet": {
+                      "path": "/iam/im/forwardinc",
+                      "port": 8080
+                    },
+                    "initialDelaySeconds": 1200
+                  },
+                  "name": "im-server",
+                  "ports": [
+                    {
+                      "containerPort": 8080
+                    },
+                    {
+                      "containerPort": 8443
+                    }
+                  ],
+                  "readinessProbe": {
+                    "httpGet": {
+                      "path": "/iam/im/forwardinc",
+                      "port": 8080
+                    },
+                    "initialDelaySeconds": 120
+                  },
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                }
+              ],
+              "dnsPolicy": "ClusterFirst",
+              "restartPolicy": "Always",
+              "volumes": [
+                {
+                  "name": "configuration",
+                  "source": {
+                    "emptyDir": {}
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "CA Directory Userstore Replication Controller"
+          },
+          "labels": {
+            "ca.com/im": "userstore"
+          },
+          "name": "userstore-controller",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "ca.com/im": "userstore"
+          },
+          "template": {
+            "metadata": {
+              "annotations": {
+                "description": "CA Directory Userstore Pod"
+              },
+              "labels": {
+                "ca.com/im": "userstore"
+              },
+              "name": "userstore",
+              "namespace": "im-12-6-07-latest-forwardinc"
+            },
+            "spec": {
+              "containers": [
+                {
+                  "env": [
+                    {
+                      "name": "DESTINATION",
+                      "value": "/solution"
+                    },
+                    {
+                      "name": "SOURCE",
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
+                  "name": "configuration",
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                },
+                {
+                  "env": [
+                    {
+                      "name": "CONFIG",
+                      "value": "forwardinc/userstore"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/directory/dxgrid:latest",
+                  "name": "userstore",
+                  "ports": [
+                    {
+                      "containerPort": 19389
+                    }
+                  ],
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                }
+              ],
+              "dnsPolicy": "ClusterFirst",
+              "restartPolicy": "Always",
+              "volumes": [
+                {
+                  "name": "configuration",
+                  "source": {
+                    "emptyDir": {}
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "CA Directory Provdir Replication Controller"
+          },
+          "labels": {
+            "ca.com/im": "provdir"
+          },
+          "name": "provdir-controller",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "ca.com/im": "provdir"
+          },
+          "template": {
+            "metadata": {
+              "annotations": {
+                "description": "CA Provioning Directory Pod"
+              },
+              "labels": {
+                "ca.com/im": "provdir"
+              },
+              "name": "provdir",
+              "namespace": "im-12-6-07-dev-forwardinc"
+            },
+            "spec": {
+              "containers": [
+                {
+                  "env": [
+                    {
+                      "name": "DESTINATION",
+                      "value": "/solution"
+                    },
+                    {
+                      "name": "SOURCE",
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
+                  "name": "configuration",
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                },
+                {
+                  "env": [
+                    {
+                      "name": "CONFIG",
+                      "value": "forwardinc/provdir"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/directory/dxgrid:latest",
+                  "name": "provdir",
+                  "ports": [
+                    {
+                      "containerPort": 20391
+                    },
+                    {
+                      "containerPort": 20394
+                    }
+                  ],
+                  "readinessProbe": {
+                    "tcpSocket": {
+                      "port": 20391
+                    },
+                    "initialDelaySeconds": 20
+                  },
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                }
+              ],
+              "dnsPolicy": "ClusterFirst",
+              "restartPolicy": "Always",
+              "volumes": [
+                {
+                  "name": "configuration",
+                  "source": {
+                    "emptyDir": {}
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "CA Provisioning Server Replication Controller"
+          },
+          "labels": {
+            "ca.com/im": "provsrv"
+          },
+          "name": "provsrv-controller",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "ca.com/im": "provsrv"
+          },
+          "template": {
+            "metadata": {
+              "annotations": {
+                "description": "CA Provioning Server Pod"
+              },
+              "labels": {
+                "ca.com/im": "provsrv"
+              },
+              "name": "provsrv",
+              "namespace": "im-12-6-07-dev-forwardinc"
+            },
+            "spec": {
+              "containers": [
+                {
+                  "env": [
+                    {
+                      "name": "DESTINATION",
+                      "value": "/solution"
+                    },
+                    {
+                      "name": "SOURCE",
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
+                  "name": "configuration",
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                },
+                {
+                  "env": [
+                    {
+                      "name": "CONFIG",
+                      "value": "forwardinc/provsrv"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/imag/im-prov-server:latest",
+                  "name": "provsrv",
+                  "ports": [
+                    {
+                      "containerPort": 20389
+                    },
+                    {
+                      "containerPort": 20390
+                    }
+                  ],
+                  "capability": "SYS_ADMIN",
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                }
+              ],
+              "dnsPolicy": "ClusterFirst",
+              "restartPolicy": "Always",
+              "volumes": [
+                {
+                  "name": "configuration",
+                  "source": {
+                    "emptyDir": {}
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "CA Connector Server Replication Controller"
+          },
+          "labels": {
+            "ca.com/im": "connserver"
+          },
+          "name": "connserver-controller",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "ca.com/im": "connserver"
+          },
+          "template": {
+            "metadata": {
+              "annotations": {
+                "description": "CA Connector Server Pod"
+              },
+              "labels": {
+                "ca.com/im": "connserver"
+              },
+              "name": "connserver",
+              "namespace": "im-12-6-07-dev-forwardinc"
+            },
+            "spec": {
+              "containers": [
+                {
+                  "env": [
+                    {
+                      "name": "DESTINATION",
+                      "value": "/solution"
+                    },
+                    {
+                      "name": "SOURCE",
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
+                  "name": "configuration",
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                },
+                {
+                  "env": [
+                    {
+                      "name": "CONFIG",
+                      "value": "forwardinc/jcs"
+                    }
+                  ],
+                  "image": "store.vapp-security.solutions/imag/connector-server:latest",
+                  "name": "connserver",
+                  "ports": [
+                    {
+                      "containerPort": 20080
+                    },
+                    {
+                      "containerPort": 20410
+                    },
+                    {
+                      "containerPort": 20411
+                    },
+                    {
+                      "containerPort": 20443
+                    },
+                    {
+                      "containerPort": 22001
+                    },
+                    {
+                      "containerPort": 22002
+                    },
+                    {
+                      "containerPort": 22099
+                    }
+                  ],
+                  "readinessProbe": {
+                    "tcpSocket": {
+                      "port": 20410
+                    },
+                    "initialDelaySeconds": 60
+                  },
+                  "volumeMounts": [
+                    {
+                      "name": "configuration",
+                      "mountPath": "/solution"
+                    }
+                  ]
+                }
+              ],
+              "dnsPolicy": "ClusterFirst",
+              "restartPolicy": "Always",
+              "volumes": [
+                {
+                  "name": "configuration",
+                  "source": {
+                    "emptyDir": {}
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "serviceList": {
+    "items": [
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "Private database service"
+          },
+          "labels": {
+            "ca.com/im": "database"
+          },
+          "name": "database",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "ports": [
+            {
+              "port": 3306,
+              "targetPort": 3306
+            }
+          ],
+          "selector": {
+            "ca.com/im": "database"
+          }
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "Public service of the IM UI",
+            "ca.com/cluster-public-hostname": "forwardinc.ca.local",
+            "ca.com/cluster-public-url": "/iam/im/forwardinc",
+            "ca.com/cluster-public-urlpath": "/iam/im",
+            "ca.com/cluster-public-urlpath-backend": "/iam/im"
+          },
+          "labels": {
+            "ca.com/cluster-public-service": "http"
+          },
+          "name": "ui",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "ports": [
+            {
+              "port": 80,
+              "targetPort": 8080
+            }
+          ],
+          "selector": {
+            "ca.com/im": "im-server"
+          },
+          "sessionAffinity": "ClientIP"
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "Private userstore service"
+          },
+          "labels": {
+            "ca.com/im": "userstore"
+          },
+          "name": "userstore",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "ports": [
+            {
+              "port": 19389,
+              "targetPort": 19389
+            }
+          ],
+          "selector": {
+            "ca.com/im": "userstore"
+          }
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "Private provdir service"
+          },
+          "labels": {
+            "ca.com/im": "provdir"
+          },
+          "name": "provdir",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "ports": [
+            {
+              "name": "router",
+              "port": 20391,
+              "targetPort": 20391
+            },
+            {
+              "name": "main",
+              "port": 20394,
+              "targetPort": 20394
+            }
+          ],
+          "selector": {
+            "ca.com/im": "provdir"
+          }
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "Private provsrv service"
+          },
+          "labels": {
+            "ca.com/im": "provsrv"
+          },
+          "name": "provsrv",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "ports": [
+            {
+              "name": "provsrv89",
+              "port": 20389,
+              "targetPort": 20389
+            },
+            {
+              "name": "provsrv90",
+              "port": 20390,
+              "targetPort": 20390
+            }
+          ],
+          "selector": {
+            "ca.com/im": "provsrv"
+          }
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
+            "description": "Private connserver service"
+          },
+          "labels": {
+            "ca.com/im": "connserver"
+          },
+          "name": "connserver",
+          "namespace": "im-12-6-07-dev-forwardinc"
+        },
+        "spec": {
+          "ports": [
+            {
+              "name": "ldap",
+              "port": 20410,
+              "targetPort": 20410
+            },
+            {
+              "name": "ldaps",
+              "port": 20411,
+              "targetPort": 20411
+            },
+            {
+              "name": "httpport",
+              "port": 20080,
+              "targetPort": 20080
+            },
+            {
+              "name": "httpsport",
+              "port": 20443,
+              "targetPort": 20443
+            },
+            {
+              "name": "rmiport",
+              "port": 22099,
+              "targetPort": 20099
+            },
+            {
+              "name": "apache",
+              "port": 22001,
+              "targetPort": 22001
+            },
+            {
+              "name": "apache2",
+              "port": 22002,
+              "targetPort": 22002
+            }
+          ],
+          "selector": {
+            "ca.com/im": "connserver"
+          }
+        }
+      }
+    ]
+  }
+}
