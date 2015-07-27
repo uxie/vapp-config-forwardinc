@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="sdkuposcript">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.stub.StubMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+            
+				<!--  Set to true to allow metadata / opbindings changes via
+            			LDAP MODIFY  -->
+				<property name="allowMetadataModify">
+		            <value>true</value>
+		        </property>
+
+                <property name="autoDirectAssocRequired">
+                    <value>true</value>
+                </property>
+
+                <property name="behaviourSearchSingleClass">
+                    <value>true</value>
+                </property>
+                <property name="objectClassRequired">
+                    <value>true</value>
+                </property>
+                <property name="indirectAssociations">
+                    <value>false</value>
+                </property>
+
+                    <!-- Example of how a built-in plug-in can be configured via XML. -->
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                          <map>
+                              <entry key="BOOL">
+                                    <!-- We set isNumeric=false which means 0/1 will be taken in from
+                                        LDAP and stored as true/false in the persisted property files. This
+                                        Spring XML causes the code "new BoolAttributeConverter(false)" to be called. -->
+                                 <bean class="com.ca.jcs.converter.attr.BoolAttributeConverter" lazy-init="default" autowire="default" dependency-check="default">
+                                     <constructor-arg>
+<value>false</value>
+</constructor-arg>
+                                 </bean>
+                              </entry>
+                          </map>
+                        </property>
+                        <property name="propertyPluginConfigs">
+                            <list>
+
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.sdk.converter.DemoFlattenPropertyConverter</value>
+                                    </property>
+                                    <property name="metadataPropNames">
+                                        <list>
+                                            <value>flattenSeparator</value>
+                                        </list>
+                                    </property>
+                                    <property name="pluginConfig">
+                                        <!-- This syntax must be used to reference an inner class in Spring XML -->
+                                        <bean class="com.ca.jcs.sdk.converter.DemoFlattenPropertyConverter$DemoFlattenConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                            <property name="valueSeparatorString">
+                                                <value>@@@FROM_CONNECTOR_XML@@@</value>
+                                            </property>
+                                        </bean>
+                                    </property>
+                                </bean>
+
+                                <!-- Example of how a plug-in registered in server_jcs.xml
+                                   can be deactivated, by being overridden with different
+                                   configuration settings which will never match. We do this here so that the SDK
+                                   and SDKSCRIPT connectors can share a single common datamodel metadata
+                                   file, even though they flatten eTSDKGroupMembers using different converters. -->
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.converter.meta.MultiValuePropertyFlattener</value>
+                                    </property>
+                                    <property name="metadataPropNames">
+                                        <list>
+                                            <!--No datamodel properties will ever have this property set.-->
+                                            <value>!deregister!</value>
+                                        </list>
+                                    </property>
+                                </bean>
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>false</value>
+                </property>
+
+            </bean>
+</property>
+</bean>
+
+</beans>

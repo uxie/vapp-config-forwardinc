@@ -1,0 +1,27 @@
+# Configuring the logs to IMAG Centralized logging volume 
+
+if [ ! -h $JCS_LOGS_DIR ]; then
+    echo "[INFO] Configuring JCS to log to IMAG centralized logging container..."
+
+    if [ ! -d $IMAG_LOG_ROOT_DIR ]; then
+      echo "[WARN] The IMAG centralized logging container volume was not found at [${IMAG_LOG_ROOT_DIR}].  JCS Logs will be sent to [${JCS_LOGS_DIR}]"
+      mkdir -p $JCS_LOGS_DIR
+    
+    else    
+      THIS_IMAG_LOG_DIR=${IMAG_LOG_ROOT_DIR}/jcs/${HOSTNAME}
+      
+      if [ -d $JCS_LOGS_DIR ]; then
+        echo "-----Removing existing logging directory [${JCS_LOGS_DIR}]..."
+        rm -Rf $JCS_LOGS_DIR
+      fi
+   
+      if [ ! -d $THIS_IMAG_LOG_DIR ]; then
+        echo "-----Creating IMAG logging volume directory [${THIS_IMAG_LOG_DIR}]..."
+        mkdir -p $THIS_IMAG_LOG_DIR
+      fi
+      
+      echo "-----Creating JCS logging symbolic link..."
+      ln -s $THIS_IMAG_LOG_DIR $JCS_LOGS_DIR
+    fi
+fi
+

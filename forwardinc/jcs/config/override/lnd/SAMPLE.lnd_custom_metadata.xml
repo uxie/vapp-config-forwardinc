@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<model xmlns="http://www.ca.com/xml/commons/datamodel">
+  <namespace name="Lotus Domino Server">
+	<doc>
+	  This file allows customization of standard LND metadata. Note that the full power of metadata is available in this document, with
+	  all the property types supported in the datamodel.xsd XML schema and all the metadata settings defined in the JavaDoc for
+	  the MetaDataUtil class (refer to HTML formatted version of “Programming Guides › Programming Guide for Java Connector Server” section in the
+	  Identity Manager R12 documentation "bookshelf".  
+	</doc>
+    <class name="eTLNDAccount">
+      
+      <property name="eTLNDCustomAttribute01">
+        <doc>Custom Attribute 01</doc>
+        	<!-- Attributes can be of any of the supported types (refer datamodel.xsd): e.g. boolValue, intValue, dateTimeValue, enumValue, flexiStrValue, setValue (multi-valued) etc -->
+        <value><strValue/></value>
+        	<!--  This specifies that customer-provided mappings are allowed for this attribute. -->
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        
+        	<!-- This specifies the name of the native LND attribute on the Person document to which you want to map. -->
+        <metadata name="connectorMapTo"><value><strValue>nativeval1</strValue></value></metadata>
+        
+        	<!-- This specifies the name to be displayed to the end-user to identify the attribute. -->
+		<metadata name="displayName"><value><strValue>Value 1</strValue></value></metadata>
+		
+			<!-- You can also specify any number of other metadata settings for the attribute too... -->
+        <metadata name="maxLength"><value><intValue>1023</intValue></value></metadata>
+      </property>
+      
+      <property name="eTLNDCustomCapabilityAttribute01">
+        <doc>Custom Capability Attribute 01</doc>
+        <value><dblValue>42</dblValue></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>nativeval2</strValue></value></metadata>
+		<metadata name="displayName"><value><strValue>Capability Value 2</strValue></value></metadata>
+		
+        <metadata name="minLength"><value><intValue>1</intValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>12</intValue></value></metadata>
+        <!-- A large number of other metadata settings can used if desired ...
+        <metadata name="isReadOnly"><value><boolValue>true</boolValue></value></metadata>   
+         -->     
+      </property>
+      
+    </class>
+    
+    <!-- Eventually Connector Xpress will output policy mappings matching those on account, but not
+    	needed for the moment as the eTLNDDirectory.eTLNDCustomAttributeInfo multi-valued
+    	attribute passed to the LND client dictates which attributes exist on both account template
+    	(aka policy) and account classes.
+    <class name="eTLNDPolicy">      
+      <property name="eTLNDCustomAttribute01">...
+      <property name="eTLNDCustomCapabilityAttribute01">...
+    </class>
+    	 -->
+  </namespace>
+</model>

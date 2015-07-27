@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="sap-ume">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.sapume.SAPUMEMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+
+				<!-- Note: Commenting out static setting is a useful speed-up when testing as allows
+		            new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+		            eTOpBindingsMetaData on the Connector Type (aka Namespace).
+		            Once testing is complete you may want to consider saving final metadata and scripts (in the opbindings metadata) to a file under revision control and
+		            then set this flag to false to lock the connector down.
+						
+					!!!CAUTION: consider implications carefully when used in production
+					-->
+				<property name="allowMetadataModify">
+		            <value>true</value>
+		        </property>
+
+				<!-- The mapping between objectclass ("connectorMapTo" metadata value for each class) and the SAP UME SPML service
+				     identifier prefix	-->
+		        <property name="identifierPrefixMap">
+					<map>
+						<entry key="sapuser">
+<value>SPML.SAPUSER.</value>
+</entry>
+						<entry key="sapgroup">
+<value>SPML.SAPGROUP.</value>
+</entry>
+						<entry key="saprole">
+<value>SPML.SAPROLE.</value>
+</entry>
+					</map>
+				</property>
+
+				<!-- When adding an UME user and the user already exists, SAP UME SPML service returns the SPML error code
+				     "urn:oasis:names:tc:SPML:1:0#malformedRequest". The only indication that the user already exists is in 
+				     the error message. This is list of texts to check. -->
+				<property name="objectAlreadyExistsTexts">
+					<list>
+                    	<value>already exists</value>
+                    </list>
+                </property>
+
+				<!-- This is the list of password related attribute names. Values for these attributes will not be logged in 
+				     debug logs for SPML addRequest and modifyRequest -->
+                <property name="passwordAttributeNames">
+					<list>
+                    	<value>password</value>
+                    	<value>oldpassword</value>
+                    </list>
+                </property>
+
+                <!-- This is the list of illegal passwords that would not be allowed on the SAP UME systems. They are 
+                     treated as case-sensitive.
+                     This list is only used to check if the generated temporary password is legal. The legality of the 
+                     final password is still checked by the UME system, not the connector. -->
+                <property name="illegalPasswords">
+					<list>
+                    	<value>PASS</value>
+                    	<value>SAP*</value>
+                    </list>
+                </property>
+
+                <!-- This is the list of characters / strings that cannot be at the start of a password.They are 
+                     treated as case-sensitive.
+                     This list is only used to check if the generated temporary password is legal. The legality of the 
+                     final password is still checked by the UME system, not the connector. -->
+                <property name="passwordCannotStartWith">
+					<list>
+                    	<value>!</value>
+                    	<value>?</value>
+                    </list>
+                </property>
+
+				<!-- The SAP UME SPML service provider ID -->
+				<property name="sapUmeSpmlProviderId">
+                    <value>SAP</value>
+                </property>
+
+				<!-- The SAP UME SPML service schema ID -->
+                <property name="sapUmeSpmlSchemaId">
+                    <value>SAPprincipals</value>
+                </property>
+
+                <!-- Maximum attribute number when search/look up users. Set to 0 for no limit when SAP has fixed the code on their side -->
+                <!-- The reason for adding this configuration is due to a SAP bug (I believe)
+                     Based on the SAP trace on location com.sap.security.core.spml, when searching for a user and requesting
+                     a large number of attributes, you will get this exception from SAP SPML service: 
+                     "Can not search users [EXCEPTION] com.sap.security.api.UMRuntimeException: This AttributeList contains already 25 attributes."
+                     
+                     The call stack in the SAP trace is :
+                     
+                     com.sap.security.api.UMRuntimeException: This AttributeList contains already 25 attributes.
+					 at com.sap.security.api.AttributeList.addAttribute(AttributeList.java:222)
+					 at com.sap.security.api.AttributeList.addAttribute(AttributeList.java:207)
+					 at com.sap.security.core.spml.UMERequestProcessor.createAttributeList(UMERequestProcessor.java:1712)
+					 at com.sap.security.core.spml.UMERequestProcessor.searchUser(UMERequestProcessor.java:2575)
+					 at com.sap.security.core.spml.UMERequestProcessor.processSearchRequest(UMERequestProcessor.java:2953)
+					 at com.sap.security.core.spml.RequestProcessor.processSearchRequest(RequestProcessor.java:103)
+					 at com.sap.security.core.spml.SPMLConsumer.doPost(SPMLConsumer.java:240)
+					 at javax.servlet.http.HttpServlet.service(HttpServlet.java:760)
+					 at javax.servlet.http.HttpServlet.service(HttpServlet.java:853)
+					 at com.sap.engine.services.servlets_jsp.server.HttpHandlerImpl.runServlet(HttpHandlerImpl.java:401)
+					 at com.sap.engine.services.servlets_jsp.server.HttpHandlerImpl.handleRequest(HttpHandlerImpl.java:266)
+					 at com.sap.engine.services.httpserver.server.RequestAnalizer.startServlet(RequestAnalizer.java:386)
+					 at com.sap.engine.services.httpserver.server.RequestAnalizer.startServlet(RequestAnalizer.java:364)
+					 at com.sap.engine.services.httpserver.server.RequestAnalizer.invokeWebContainer(RequestAnalizer.java:1039)
+					 at com.sap.engine.services.httpserver.server.RequestAnalizer.handle(RequestAnalizer.java:265)
+					 at com.sap.engine.services.httpserver.server.Client.handle(Client.java:95)
+					 at com.sap.engine.services.httpserver.server.Processor.request(Processor.java:175)
+					 at com.sap.engine.core.service630.context.cluster.session.ApplicationSessionMessageListener.process(ApplicationSessionMessageListener.java:33)
+					 at com.sap.engine.core.cluster.impl6.session.MessageRunner.run(MessageRunner.java:41)
+					 at com.sap.engine.core.thread.impl3.ActionObject.run(ActionObject.java:37)
+					 at java.security.AccessController.doPrivileged(Native Method)
+					 at com.sap.engine.core.thread.impl3.SingleThread.execute(SingleThread.java:104)
+					 at com.sap.engine.core.thread.impl3.SingleThread.run(SingleThread.java:176)
+                     
+                     And according to the java doc here:
+                     http://help.sap.com/javadocs/NW04S/current/se/com/sap/security/api/AttributeList.html
+                     
+                     "A AttributeList can only contain 25 attributes."
+                     
+                     So this seems to be a hard limit in code not something that is configurable on SAP side.
+                -->
+                <property name="maxAttributeNumber">
+                    <value>25</value>
+                </property>
+                
+                
+                <!-- Connector speak SAP Group object class -->
+                <property name="groupObjectClassName">
+                	<value>sapgroup</value>
+                </property>
+                
+                <!-- Group child attribute name -->
+                <property name="groupMemberAttributeName">
+                	<value>member</value>
+                </property>
+
+                <property name="poolConfig">
+                    <bean class="com.ca.commons.cfg.GenericObjectPoolConfigBeanWrapper" lazy-init="default" autowire="default" dependency-check="default">
+                        <!--refer to Jakarta Commons Pool documentation
+                        http://jakarta.apache.org/commons/pool/apidocs/org/apache/commons/pool/impl/GenericObjectPool.html
+                            for complete listing of configurable settings. -->
+
+                        <!-- The maximum number of active connections that can be allocated from this
+                            pool at the same time, negative for no limit. -->
+                        <property name="maxActive">
+<value>10</value>
+</property>
+
+                        <!-- The minimum number of connections that can remain idle in the pool, without extra ones
+                            being created, or zero to create none. Best to create it on demand instead. -->
+                        <!--<property name="minIdle"><value>0</value></property>-->
+
+                        <!-- The maximum number of connections that can remain idle in the pool, without extra
+                            ones being released, or negative for no limit. -->
+                        <property name="maxIdle">
+<value>10</value>
+</property>
+
+                        <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                        <!--<property name="maxWait">-1</property>-->
+
+                            <!-- The minimum amount of time an object may sit idle in the pool before it is eligible
+                                for eviction.
+                                10 * 60 * 1000 = 10 minutes -->
+                        <property name="minEvictableIdleTimeMillis">
+<value>600000</value>
+</property>
+                            <!-- The number of milliseconds to sleep between runs of the idle object eviction thread.
+                                1 * 60 * 1000 = 1 minute -->
+                        <property name="timeBetweenEvictionRunsMillis">
+<value>60000</value>
+</property>
+                            <!-- Validate connection when obtaining it from the connector's connection pool -->
+                        <property name="testOnBorrow">
+<value>false</value>
+</property>
+                            <!-- Validate connection while it is idling in the connector's connection pool -->
+                        <property name="testWhileIdle">
+<value>false</value>
+</property>
+                    </bean>
+                </property>
+
+        		<property name="exceptionRetryMap">
+                    <map>
+                       <!-- If any of these strings are found anywhere within a connection related
+                            exception method, then they signify retriable errors -->
+                        <entry key="NormalConnectionException">
+                            <!-- Normal retry case for (possibly/probably) transient failure conditions. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection (NormalConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                      <value>Message send failed</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+
+            			<entry key="StaleConnectionException">
+                            <!-- Stale connections are only retried once. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is stale (StaleConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>1</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                      <value/>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+
+                        <entry key="BusyConnectionException">
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is busy (BusyConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>60000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <value>Server Busy</value>
+                                        <value>Not Ready</value>
+                                        <value>Service Unavailable</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+	            	</map>
+            	</property>
+
+            	<property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                    	<property name="typeToPluginMap">
+                            <map>
+                                <entry key="DATETIME">
+                                    <bean class="com.ca.jcs.converter.attr.GeneralizedTimeAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                            </map>
+                        </property>
+						<property name="propertyPluginConfigs">
+							<list>
+								<bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+								   <property name="pluginClass">
+									   <value>com.ca.jcs.sapume.converter.SAPUMEDNPropertyConverter</value>
+								   </property>
+								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>DNLdapObjectClass</value>
+                               			   <value>DNLdapObjectClasses</value>
+    			                           <value>isDNAbsolute</value>
+    			                           <value>DNTestExists</value>
+    			                           <value>DNNameOnly</value>
+									   </list>
+								   </property>
+							   </bean>
+
+							   <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+									<property name="pluginClass">
+									   <value>com.ca.jcs.sapume.converter.SAPUMEUserDataSourcePropertyConverter</value>
+								   </property>
+								   <property name="pluginConfig">
+                                       <bean class="com.ca.jcs.sapume.converter.SAPUMEDataSourcePropertyConverter$SAPUMEDataSourceConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                           <property name="SAPUMEDataSourceMap">
+                                               <map>
+                                                   <entry key="ABAP">
+<value>R3_DATASOURCE</value>
+</entry>
+                                                   <entry key="LDAP">
+<value>CORP_LDAP</value>
+</entry>
+                                                   <entry key="UME Database">
+<value>PRIVATE_DATASOURCE</value>
+</entry>
+                                               </map>
+                                           </property>
+                                       </bean>
+								   </property>
+								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>sapUmeUserDataSource</value>
+									   </list>
+								   </property>
+							   </bean>
+
+							   <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+									<property name="pluginClass">
+									   <value>com.ca.jcs.sapume.converter.SAPUMEGroupDataSourcePropertyConverter</value>
+								   </property>
+								   <property name="pluginConfig">
+                                       <bean class="com.ca.jcs.sapume.converter.SAPUMEDataSourcePropertyConverter$SAPUMEDataSourceConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                           <property name="SAPUMEDataSourceMap">
+                                               <map>
+                                                   <entry key="Built-in Groups Adapter">
+<value>SUPER_GROUPS_DATASOURCE</value>
+</entry>
+                                                   <entry key="R3_ROLE_DS">
+<value>R3_ROLE_DS</value>
+</entry>
+                                                   <entry key="LDAP">
+<value>CORP_LDAP</value>
+</entry>
+                                                   <entry key="UME Database">
+<value>PRIVATE_DATASOURCE</value>
+</entry>
+                                               </map>
+                                           </property>
+                                       </bean>
+								   </property>
+								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>sapUmeGroupDataSource</value>
+									   </list>
+								   </property>
+							   </bean>
+
+							   <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+									<property name="pluginClass">
+									   <value>com.ca.jcs.sapume.converter.SAPUMERoleDataSourcePropertyConverter</value>
+								   </property>
+								   <property name="pluginConfig">
+                                       <bean class="com.ca.jcs.sapume.converter.SAPUMEDataSourcePropertyConverter$SAPUMEDataSourceConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                           <property name="SAPUMEDataSourceMap">
+                                               <map>
+                                                   <entry key="Portal Role">
+<value>PCD_ROLE_PERSISTENCE</value>
+</entry>
+                                                   <entry key="UME Database">
+<value>UME_ROLE_PERSISTENCE</value>
+</entry>
+                                               </map>
+                                           </property>
+                                       </bean>
+								   </property>
+								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>sapUmeRoleDataSource</value>
+									   </list>
+								   </property>
+							   </bean>
+
+							</list>
+						</property>
+                    </bean>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>false</value>
+                </property>
+
+                <!-- If true then a search requesting all attributes be returned (search control's return attribute ids array is null),
+                     will only returned attributes not marked as "expensive" in the matadata (e.g. photographs or associative relationships).
+                     Expensive attributes can still be returned but must be explicitly requested. Note lookups requesting all attribute
+                     values will get both cheap and expensive ones, as only a single object is targetted. -->
+                <property name="searchExpensiveAttrs">
+                    <value>false</value>
+                </property>
+                
+                <property name="containerBaseObjectClass">
+                    <value>eTDYNDirectory</value>
+                </property>
+            </bean>
+</property>
+</bean>
+
+</beans>

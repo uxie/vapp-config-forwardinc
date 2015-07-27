@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean id="suspendStateMap" class="java.util.HashMap" lazy-init="default" autowire="default" dependency-check="default">
+<constructor-arg>
+            <map>
+                <entry key="1">
+                    <value>*DISABLED</value>
+                </entry>
+                <entry key="0">
+                    <value>*ENABLED</value>
+                </entry>
+            </map>
+        </constructor-arg>
+</bean>
+
+    <bean class="com.ca.jcs.ImplBundle" parent="as400">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.as400.AS400ConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+
+                <!--When cascadingDelete is set to true, all objects owned by the user profile will be deleted as well while the user-->
+                <!--is deleted.-->
+                <!--If cascadingDelete is set to false, the default behavior is used that is the user profile will NOT be deleted if-->
+                <!--it owns objects.-->
+                <property name="cascadingDelete">
+                    <value>true</value>
+                </property>
+                <!--
+                    Note: Commenting out static setting is a useful speed-up when testing as allows
+                    new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+                    eTOpBindingsMetaData on the Connector Type (aka Namespace).
+                    Once testing is complete you can save final metadata and scripts (in the opbindings metadata) to a file under revision control and
+                    then set to false to lock the connector down.
+
+                    NOTE: make sure you understand the implications of setting to true in production.
+                -->
+                <property name="allowMetadataModify">
+                    <value>false</value>
+                </property>
+
+                <!--
+                    Disable rollback of connection related attributes by default due to possibly limited
+                    number of connection attempts before account can be locked out (rollback uses up a login attempt)
+                 -->
+                <property name="rollbackConnectionAttrs">
+                    <value>false</value>
+                </property>
+
+                <property name="poolConfig">
+                    <bean class="com.ca.commons.cfg.GenericObjectPoolConfigBeanWrapper" lazy-init="default" autowire="default" dependency-check="default">
+                        <!--refer to Jakarta Commons Pool documentation
+                        http://jakarta.apache.org/commons/pool/apidocs/org/apache/commons/pool/impl/GenericObjectPool.html
+                            for complete listing of configurable settings. -->
+
+                        <!-- The maximum number of active connections that can be allocated from this
+                            pool at the same time, negative for no limit. -->
+                        <property name="maxActive">
+<value>10</value>
+</property>
+
+                        <!-- The minimum number of connections that can remain idle in the pool, without extra ones
+                            being created, or zero to create none. Best to create it on demand instead. -->
+                        <!--<property name="minIdle"><value>1</value></property>-->
+
+                        <!-- The maximum number of connections that can remain idle in the pool, without extra
+                            ones being released, or negative for no limit. -->
+                        <property name="maxIdle">
+<value>4</value>
+</property>
+
+                        <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                        <!--<property name="maxWait">-1</property>-->
+
+                            <!-- The minimum amount of time an object may sit idle in the pool before it is eligable
+                                for eviction.
+                                10 * 60 * 1000 = 10 minutes -->
+                        <property name="minEvictableIdleTimeMillis">
+<value>600000</value>
+</property>
+                            <!-- The number of milliseconds to sleep between runs of the idle object evictor thread.
+                                1 * 60 * 1000 = 2 minutes -->
+                        <property name="timeBetweenEvictionRunsMillis">
+<value>60000</value>
+</property>
+                    </bean>
+                </property>
+                <property name="validators">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                <entry key="FLEXI_STR:suspendState">
+                                    <bean class="com.ca.jcs.validator.attr.MapAttributeValidator" lazy-init="default" autowire="default" dependency-check="default">
+                                        <constructor-arg>
+                                            <value>false</value>
+                                        </constructor-arg>
+                                        <constructor-arg>
+                                            <ref bean="suspendStateMap"/>
+                                        </constructor-arg>
+                                    </bean>
+                                </entry>
+                            </map>
+                        </property>
+                    </bean>
+                </property>
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                <entry key="FLEXI_STR:suspendState">
+                                    <bean class="com.ca.jcs.converter.attr.MapAttributeConverter" lazy-init="default" autowire="default" dependency-check="default">
+                                        <constructor-arg>
+                                            <value>false</value>
+                                        </constructor-arg>
+                                        <constructor-arg>
+                                            <ref bean="suspendStateMap"/>
+                                        </constructor-arg>
+                                    </bean>
+                                </entry>
+                            </map>
+                        </property>
+                        <!-- enable the functionality that convert the multi-valued attributes to String arrays -->
+                        <property name="propertyPluginConfigs">
+                            <list>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.converter.meta.StringArrayPropertyConverter</value>
+                                    </property>
+                                    <property name="pluginConfig">
+                                        <bean class="com.ca.jcs.converter.meta.ConverterConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                            <property name="activeByDefault">
+                                                <value>true</value>
+                                            </property>
+                                            <property name="order">
+                                                <value>100</value>
+                                            </property>
+                                        </bean>
+                                    </property>
+                                    <property name="metadataPropNames">
+                                        <list>
+                                            <value>isMultiValued</value>
+                                        </list>
+                                    </property>
+                                </bean>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.converter.meta.BoolPropertyConverter</value>
+                                    </property>
+                                    <property name="pluginConfig">
+                                        <bean class="com.ca.jcs.converter.meta.BoolPropertyConverter$BoolConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                            <property name="activeByDefault">
+                                                <value>true</value>
+                                            </property>
+                                            <property name="numeric">
+                                                <value>false</value>
+                                            </property>
+                                            <property name="order">
+                                                <value>100</value>
+                                            </property>
+                                        </bean>
+                                    </property>
+                                </bean>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.converter.meta.JavaObjectPropertyConverter</value>
+                                    </property>
+                                    <property name="pluginConfig">
+                                        <bean class="com.ca.jcs.converter.meta.JavaObjectPropertyConverter$Config" lazy-init="default" autowire="default" dependency-check="default">
+                                            <property name="activeByDefault">
+                                                <value>true</value>
+                                            </property>
+                                            <property name="order">
+                                                <value>200</value>
+                                            </property>
+                                        </bean>
+                                    </property>
+                                    <!-- Specifying no metadata property names
+                                        means checked against all properties,
+                                        where plug-in constructor decides on
+                                        relevance -->
+                                </bean>
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>true</value>
+                </property>
+
+            </bean>
+</property>
+</bean>
+
+</beans>

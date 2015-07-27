@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="tss">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.connectors.common.mf.MFMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+                    <!-- For an example of how pool configuration settings can be specified,
+                        look at JNDI connector's conf/connector.xml
+                <property name="poolConfig">
+                    <bean class="com.ca.jcs.cfg.GenericObjectPoolConfigBeanWrapper">
+                            ....
+                    </bean>
+                </property>
+                -->
+
+				<!-- Note: Commenting out static setting is a useful speed-up when testing as allows
+		            new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+		            eTOpBindingsMetaData on the Connector Type (aka Namespace).
+		            Once testing is complete you may want to consider saving final metadata and scripts (in the opbindings metadata) to a file under revision control and
+		            then set this flag to false to lock the connector down.
+						
+					!!!CAUTION: consider implications carefully when used in production
+					-->
+				<property name="allowMetadataModify">
+		            <value>true</value>
+		        </property>
+      
+        		<!-- For group object, until such time as the connector provides filtering in the name. -->
+				<property name="allowNonFilterableNamingAttrs">
+		            <value>true</value>
+		        </property>
+		        
+                <property name="poolConfig">
+                    <bean class="com.ca.jcs.cfg.GenericObjectPoolConfigBeanWrapper" lazy-init="default" autowire="default" dependency-check="default">
+                        <!--refer to Jakarta Commons Pool documentation
+                        http://jakarta.apache.org/commons/pool/apidocs/org/apache/commons/pool/impl/GenericObjectPool.html
+                            for complete listing of configurable settings. -->
+
+                        <!-- The maximum number of active connections that can be allocated from this
+                            pool at the same time, negative for no limit. -->
+                        <property name="maxActive">
+<value>-1</value>
+</property>
+
+                        <!-- The minimum number of connections that can remain idle in the pool, without extra ones
+                            being created, or zero to create none. Best to create it on demand instead. -->
+                        <!--<property name="minIdle"><value>0</value></property>-->
+
+                        <!-- The maximum number of connections that can remain idle in the pool, without extra
+                            ones being released, or negative for no limit. -->
+                        <property name="maxIdle">
+<value>10</value>
+</property>
+
+                        <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                        <!--<property name="maxWait">-1</property>-->
+
+                            <!-- The minimum amount of time an object may sit idle in the pool before it is eligible
+                                for eviction.
+                                10 * 60 * 1000 = 10 minutes -->
+                        <property name="minEvictableIdleTimeMillis">
+<value>600000</value>
+</property>
+                            <!-- The number of milliseconds to sleep between runs of the idle object eviction thread.
+                                1 * 60 * 1000 = 1 minute -->
+                        <property name="timeBetweenEvictionRunsMillis">
+<value>60000</value>
+</property>
+                            <!-- Validate session when obtaining it from the connector's connection pool -->
+                        <property name="testOnBorrow">
+<value>false</value>
+</property>
+                            <!-- Validate session while it is idling in the connector's connection pool -->
+                        <property name="testWhileIdle">
+<value>false</value>
+</property>
+                    </bean>
+                </property>
+
+        				<property name="exceptionRetryMap">
+                    <map>
+                            <!-- If any of these strings are found anywhere within a connection related
+                                exception method, then they signify retriable errors -->
+                        <entry key="NormalConnectionException">
+                                <!-- Normal retry case for (possibly/probably) transient failure conditions. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection (NormalConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <value>Connection refused</value>
+                                        <value>Connection reset</value>
+                                        <value>Socket closed</value>
+                                        <value>Connection timed out</value>
+                                        <value>Connection closed</value>
+                                        <value>No route to host</value>
+                                        <value>[LDAP: error code 1 - Operations Error]</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+            						<entry key="StaleConnectionException">
+                                <!-- Stale connections are only retried once. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is stale (StaleConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>1</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <!--add exception messages here for stale connection-->
+                                        <!--<value>To be specified</value>-->
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+                        <entry key="BusyConnectionException">
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is busy (BusyConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>60000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <!--add exception messages here for busy connection-->
+                                        <!--<value>To be specified</value>-->
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+                    </map>
+                </property>
+				
+				<property name="validators">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>                                 
+								<entry key="COMPOUND_VALUE_CLASS_REF:ResourceCompoundAssociation">
+									<bean class="com.ca.jcs.tss.validator.TSSResourceCompoundAttributeValidator" lazy-init="default" autowire="default" dependency-check="default"/>									
+								</entry>
+                            </map>
+						</property>
+					</bean>
+                </property>
+
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                <entry key="INT">
+                                    <bean class="com.ca.jcs.connectors.common.mf.converter.MFIntAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                                <entry key="DATE">
+                                    <bean class="com.ca.jcs.connectors.common.mf.converter.MFDateAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                            </map>
+                        </property>
+						<property name="propertyPluginConfigs">
+							<list>
+								<bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+								   <property name="pluginClass">
+									   <value>com.ca.jcs.tss.converter.TSSListOfScopePropertyConverter</value>
+								   </property>
+								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>eTTSSListOfScopeClasses</value>
+									   </list>
+								   </property>
+							   </bean>
+								<bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+								   <property name="pluginClass">
+									   <value>com.ca.jcs.tss.converter.TSSTSOOptionsCompoundPropertyConverter</value>
+								   </property>
+								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>TssTSOCompound</value>
+									   </list>
+								   </property>
+							   </bean>
+								<bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+								   <property name="pluginClass">
+									   <value>com.ca.jcs.tss.converter.TSSCicsAutoTransactionCompoundPropertyConverter</value>
+								   </property>
+								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>TssCICSAutoTransaction</value>
+									   </list>
+								   </property>
+							   </bean>
+								<bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+								   <property name="pluginClass">
+									   <value>com.ca.jcs.tss.converter.TSSAssocCompoundPropertyConverter</value>
+								   </property>
+								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>TssGroupCompound</value>
+    			                           <value>TssProfileCompound</value>
+									   </list>
+								   </property>
+							   </bean>
+							</list>
+						</property>
+                        <property name="classPluginConfigs">
+                            <list>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.connectors.common.mf.converter.MFAccountClassConverter</value>
+                                    </property>
+ 								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>defaultPolicyValue</value>
+									   </list>
+								   </property>
+                               </bean>
+                            </list>
+                        </property>
+                     </bean>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>false</value>
+                </property>
+
+                <!-- LDAP Version to communicate with mainframe -->
+                <property name="ldapVersion">
+                    <value>3</value>
+                </property>
+
+                <!-- The database name specific to the connector type (i.e. caacf2_dn, caracf_dn or catss_dn) -->
+                <property name="databaseName">
+                    <value>catss_dn</value>
+                </property>
+
+                <!-- Defines how mainframe system treats 2 digits year value.
+                     For YY > vergeYear, the year is assumed to be in the twentieth century.
+                     For YY <= vergeYear, the year is considered to be in the twenty-first century. -->
+                <property name="vergeYear">
+                    <value>69</value>
+                </property>
+
+                <!-- Host naming attribute ID specific to the connector type (i.e. acfHostNamingMode, tssHostNamingMode)
+     				 Should have empty value for RACF as there's no such attribute in case of RACF. -->
+                <property name="hostNamingModeAttrId">
+                    <value>tssHostNamingMode</value>
+                </property>
+
+                <!-- Host naming attribute ID specific to the connector type (i.e. acfHostNamingMode, tssHostNamingMode)
+     				 Should have empty value for RACF as there's no such attribute in case of RACF. -->
+                <property name="searchContainerMetadataName">
+                    <value>MF:searchContainer</value>
+                </property>
+
+                <!-- If true then a search requesting all attributes be returned (search control's return attribute ids array is null),
+                     will only returned attributes not marked as "expensive" in the matadata (e.g. photographs or associative relationships).
+                     Expensive attributes can still be returned but must be explicitly requested. Note lookups requesting all attribute
+                     values will get both cheap and expensive ones, as only a single object is targetted. -->
+                <property name="searchExpensiveAttrs">
+                    <value>false</value>
+                </property>
+                
+                <property name="containerBaseObjectClass">
+                    <value>eTDYNDirectory</value>
+                </property>
+            </bean>
+</property>
+</bean>
+
+</beans>

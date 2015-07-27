@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.o365.O365ConnectionManager" id="o365ConnectionManager" init-method="init" destroy-method="destroy" lazy-init="default" autowire="default" dependency-check="default">
+<constructor-arg>
+            <value>O365</value>
+        </constructor-arg>
+</bean>
+    
+    <bean class="com.ca.jcs.ImplBundle" parent="o365">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.o365.O365MetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+				<!-- The PowerShell executable -->
+                <property name="exe">
+                    <value>powershell.exe</value>
+                </property>
+                <!-- Commands to connect to Office 365 and Exchange Online -->
+                <property name="connectCmds">
+                    <list>
+                        <value>(get-host).ui.rawui.buffersize = new-object System.Management.Automation.Host.Size(1000, (get-host).ui.rawui.buffersize.height)</value>
+                        <value>$cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $username, (convertto-securestring $password -asplaintext -force)</value>               
+                        <value>Import-Module MSOnline</value>
+                        <value>Connect-MsolService -Credential $cred</value>
+                        <value>$session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.outlook.com/powershell/ -Credential $cred -Authentication Basic -AllowRedirection -SessionOption (New-PSSessionOption -IdleTimeOut 60000)</value>
+                        <value>Import-PSSession $session</value>
+                    </list>
+                </property>
+                <!-- Commands to disconnect from exchange online -->
+                <property name="disconnectCmds">
+                    <list>
+                        <value>Get-PSsession | Remove-PSsession</value>
+                    </list>     
+                </property>                
+                <!-- Halt execution settings allow the connector to pause all outstanding commands until a condition is met.
+                    maxHaltExecution = 30
+                    haltExecutionTimeMillis = 10000
+                    the connector will halt for 30 * 10s, or until a condition is met -->          
+                <!-- The maximum number of halt execution allowed at a time, 0 when halt execution is not allowed -->
+                <property name="maxHaltExecution">
+                    <value>30</value>
+                </property>     
+                <!-- The number of milliseconds to sleep in each halt execution -->
+                <property name="haltExecutionTimeMillis">
+                    <value>10000</value>
+                </property>             
+                <!-- Whether to keep a connection to Powershell while halting. Keeping the connection will increase
+                     throughput if the connection pool maxActive is > number of threads handling requests, but
+                     decrease throughput in the normal case where connections are shared by multiple threads. -->
+                <property name="keepConnectionWhileHalting">
+                    <value>false</value>
+                </property>             
+
+                <property name="typePoolConfig">
+                    <bean class="com.ca.jcs.o365.connection.O365ConnectionPoolConfig" lazy-init="default" autowire="default" dependency-check="default">
+                        <!--refer to Jakarta Commons Pool documentation
+                        http://jakarta.apache.org/commons/pool/apidocs/org/apache/commons/pool/impl/GenericKeyedObjectPool.html
+                            for complete listing of configurable settings. -->                          
+                        <!-- The maximum number of connections that can remain idle in the pool, without extra
+                            ones being released, or negative for no limit. -->
+                        <property name="maxIdle">
+<value>1</value>
+</property>                            
+                        <!-- The maximum number of active connections that can be allocated from this
+                            pool at the same time, negative for no limit. -->
+                        <property name="maxActive">
+<value>50</value>
+</property>                      
+                        <!-- Sets the action to take when the pool is exhausted, 
+                            should set to WHEN_EXHAUSTED_BLOCK, otherwise the maxActive setting will have no effect.
+                            WHEN_EXHAUSTED_FAIL = 0
+                            WHEN_EXHAUSTED_BLOCK = 1                            
+                            WHEN_EXHAUSTED_GROW = 2 -->
+                        <property name="whenExhaustedAction">
+<value>1</value>
+</property>
+                        <!-- If the connection pool exhausted action is set to WHEN_EXHAUSTED_BLOCK, 
+                        	sets the maximum amount of time connection pool should block before throwing an exception. 
+                        	When less than or equal to 0, the connection pool may block indefinitely. 
+                        	10 * 60 * 1000 = 10 minutes -->
+                        <property name="maxWait">
+<value>600000</value>
+</property>                        
+                        <!-- The minimum amount of time an object may sit idle in the pool before it is eligible
+                            for eviction.
+                            10 * 60 * 1000 = 10 minutes -->
+                        <property name="minEvictableIdleTimeMillis">
+<value>600000</value>
+</property>
+                        <!-- The number of milliseconds to sleep between runs of the idle object eviction thread.
+                            1 * 60 * 1000 = 1 minute -->
+                        <property name="timeBetweenEvictionRunsMillis">
+<value>60000</value>
+</property>
+                        <!-- Validate connection when obtaining it from the connector's connection pool -->
+                        <property name="testOnBorrow">
+<value>true</value>
+</property>
+                        <!-- Validate connection when returning it to the connector's connection pool -->
+                        <property name="testOnReturn">
+<value>false</value>
+</property>                       
+                        <!-- Validate connection while it is idling in the connector's connection pool -->
+                        <property name="testWhileIdle">
+<value>false</value>
+</property>
+                    </bean>
+                </property>                                             
+                <property name="allowMetadataModify">
+                    <value>true</value>
+                </property>                 
+
+                    <!-- Example of how a built-in plug-in can be configured via XML. -->
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="propertyPluginConfigs">
+                            <list>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.o365.O365BoolPropertyConverter</value>
+                                    </property>
+                                    <property name="metadataPropNames">
+                                        <list>
+                                            <value>PSBoolean</value>
+                                        </list>
+                                    </property>
+                                </bean>                         
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="exceptionRetryMap">
+                    <map>
+                        <!-- If any of these strings are found anywhere within a connection related
+                 exception method, then they signify retriable errors -->
+                        <entry key="NormalConnectionException">
+
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is lost (NormalConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>1000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <value>Communication failure</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+                    </map>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>false</value>
+                </property>
+                
+                <!-- Set this to false to give an opportunity for the script to set the cmd to execute -->
+                <property name="lazyConnect">
+                    <value>true</value>
+                </property>
+
+            </bean>
+</property>
+</bean>
+
+</beans>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="ca-dlp">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.meta.MetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+            
+				<!--  Set to true to allow metadata / opbindings changes via
+            			LDAP MODIFY  -->
+				<property name="allowMetadataModify">
+		            <value>true</value>
+		        </property>
+        
+                    <!-- For an example of how pool configuration settings can be specified,
+                        look at JNDI connector's conf/connector.xml
+                <property name="poolConfig">
+                    <bean class="com.ca.commons.cfg.GenericObjectPoolConfigBeanWrapper">
+                            ....
+                    </bean>
+                </property>
+                -->
+                
+                
+
+                <property name="validateToConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>true</value>
+                </property>
+
+                <!-- If true then a search requesting all attributes be returned (search control's return attribute ids array is null),
+                     will only returned attributes not marked as "expensive" in the matadata (e.g. photographs or associative relationships).
+                     Expensive attributes can still be returned but must be explicitly requested. Note lookups requesting all attribute
+                     values will get both cheap and expensive ones, as only a single object is targetted. -->
+                <property name="searchExpensiveAttrs">
+                    <value>false</value>
+                </property>
+                
+                <property name="containerBaseObjectClass">
+                    <value>eTDYNDirectory</value>
+                </property>
+            </bean>
+</property>
+</bean>
+
+</beans>

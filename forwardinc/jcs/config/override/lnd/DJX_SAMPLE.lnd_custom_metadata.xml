@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<model xmlns="http://www.ca.com/xml/commons/datamodel">
+  <namespace name="Lotus Domino Server">
+	<doc>Supports Lotus Notes Domino Server with Japanese extensions (DJX).
+	This template allows easy mapping of eTLNDCustomAttribute* and eTLNDCustomCapabilityAttribute* attributes (the latter set are relevant for account template synchronization) where standard DJX attributes have already been mapped for you.</doc>
+    
+	<metadata name="projectName">
+		<value>
+			<strValue>Lotus Notes Domino (DJX)</strValue>
+		</value>
+	</metadata>
+	
+	<!-- Enum for Boolean Type Custom Attribute -->	  
+  <enum name="YesNoBool">
+  	<doc>enum boolean value</doc>
+  	<val ordinal="0">No</val>
+  	<val ordinal="1">Yes</val> 
+  </enum>
+  
+    <class name="eTLNDAccount">
+
+			<!-- Altnative Full Name for Sorting (Phonetic Name) -->      
+      <property name="eTLNDCustomAttribute01">
+        <doc>Custom Attribute 01</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>AltFullNameSort</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Alternate Full Name Sort</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>1023</intValue></value></metadata>
+      </property>
+
+			<!-- Personal Ranking -->			
+      <property name="eTLNDCustomAttribute02">
+        <doc>Custom Attribute 02</doc>
+        <value><intValue>0</intValue></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>PersonalID</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Personal Ranking</strValue></value></metadata>
+				<!-- The highest tested personal ranking value available is 61 (with Domino 7.0.3) -->
+        <metadata name="maxLength"><value><intValue>2</intValue></value></metadata>  
+      </property>
+
+			<!-- Hierarchy 1 Level 0 -->      
+      <property name="eTLNDCustomAttribute03">
+        <doc>Custom Attribute 03</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level0</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 0 Level 0</strValue></value></metadata>
+				<!-- The maximum length of Dept. Name of DJX native tool is 32 characters (with Domino 7.0.3) -->
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+
+			<!-- Hierarchy 1 Level 1 -->      
+      <property name="eTLNDCustomAttribute04">
+        <doc>Custom Attribute 04</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level1</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 0 Level 1</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+
+			<!-- Hierarchy 1 Level 2 -->       
+      <property name="eTLNDCustomAttribute05">
+        <doc>Custom Attribute 05</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level2</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 0 Level 2</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+
+			<!-- Hierarchy 1 Level 3 -->       
+      <property name="eTLNDCustomAttribute06">
+        <doc>Custom Attribute 06</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level3</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 0 Level 3</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+
+			<!-- Hierarchy 1 Level 4 -->       
+      <property name="eTLNDCustomAttribute07">
+        <doc>Custom Attribute 07</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level4</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 0 Level 4</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+
+			<!-- Hierarchy 1 Level 5 -->       
+      <property name="eTLNDCustomAttribute08">
+        <doc>Custom Attribute 08</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level5</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 0 Level 5</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+
+			<!-- Hierarchy 1 Level 6 -->       
+      <property name="eTLNDCustomAttribute09">
+        <doc>Custom Attribute 09</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level6</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 0 Level 6</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+
+			<!-- Hierarchy 1 Level Order -->       
+      <property name="eTLNDCustomAttribute10">
+        <doc>Custom Attribute 10</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>LevelOrder</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 0 Level Order</strValue></value></metadata>
+				<!-- The maximum length of Level Order should be 3 x 7 intergers -->
+        <metadata name="maxLength"><value><intValue>21</intValue></value></metadata>
+      </property>
+
+			<!-- Hierarchy 2 Level 0 -->       
+      <property name="eTLNDCustomAttribute11">
+        <doc>Custom Attribute 11</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level0_1</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 1 Level 0</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+
+			<!-- Hierarchy 2 Level 1 -->       
+      <property name="eTLNDCustomAttribute12">
+        <doc>Custom Attribute 12</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level1_1</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 1 Level 1</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 2 Level 2 --> 
+      <property name="eTLNDCustomAttribute13">
+        <doc>Custom Attribute 13</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level2_1</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 1 Level 2</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 2 Level 3 --> 
+      <property name="eTLNDCustomAttribute14">
+        <doc>Custom Attribute 14</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level3_1</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 1 Level 3</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 2 Level 4 --> 
+      <property name="eTLNDCustomAttribute15">
+        <doc>Custom Attribute 15</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level4_1</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 1 Level 4</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 2 Level 5 --> 
+      <property name="eTLNDCustomAttribute16">
+        <doc>Custom Attribute 16</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level5_1</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 1 Level 5</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 2 Level 6 --> 
+      <property name="eTLNDCustomAttribute17">
+        <doc>Custom Attribute 17</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level6_1</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 1 Level 6</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 2 Level Order --> 
+      <property name="eTLNDCustomAttribute18">
+        <doc>Custom Attribute 18</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>LevelOrder_1</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 1 Level Order</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>21</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 3 Level 0 --> 
+      <property name="eTLNDCustomAttribute19">
+        <doc>Custom Attribute 19</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level0_2</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 2 Level 0</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 3 Level 1 --> 
+      <property name="eTLNDCustomAttribute20">
+        <doc>Custom Attribute 20</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level1_2</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 2 Level 1</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 3 Level 2 --> 
+      <property name="eTLNDCustomAttribute21">
+        <doc>Custom Attribute 21</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level2_2</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 2 Level 2</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 3 Level 3 --> 
+      <property name="eTLNDCustomAttribute22">
+        <doc>Custom Attribute 22</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level3_2</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 2 Level 3</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 3 Level 4 --> 
+      <property name="eTLNDCustomAttribute23">
+        <doc>Custom Attribute 23</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level4_2</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 2 Level 4</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 3 Level 5 --> 
+      <property name="eTLNDCustomAttribute24">
+        <doc>Custom Attribute 24</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level5_2</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 2 Level 5</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 3 Level 6 --> 
+      <property name="eTLNDCustomAttribute25">
+        <doc>Custom Attribute 26</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level6_2</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 2 Level 6</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 3 Level Order --> 
+      <property name="eTLNDCustomAttribute26">
+        <doc>Custom Attribute 26</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>LevelOrder_2</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 2 Level Order</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>21</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 4 Level 0 --> 
+      <property name="eTLNDCustomAttribute27">
+        <doc>Custom Attribute 27</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level0_3</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 3 Level 0</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 4 Level 1 --> 
+      <property name="eTLNDCustomAttribute28">
+        <doc>Custom Attribute 28</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level1_3</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 3 Level 1</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 4 Level 2 --> 
+      <property name="eTLNDCustomAttribute29">
+        <doc>Custom Attribute 29</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level2_3</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 3 Level 2</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 4 Level 3 --> 
+      <property name="eTLNDCustomAttribute30">
+        <doc>Custom Attribute 30</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level3_3</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 3 Level 3</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 4 Level 4 --> 
+      <property name="eTLNDCustomAttribute31">
+        <doc>Custom Attribute 31</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level4_3</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 3 Level 4</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 4 Level 5 --> 
+      <property name="eTLNDCustomAttribute32">
+        <doc>Custom Attribute 32</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level5_3</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 3 Level 5</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 4 Level 6 --> 
+      <property name="eTLNDCustomAttribute33">
+        <doc>Custom Attribute 33</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Level6_3</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 3 Level 6</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>32</intValue></value></metadata>
+      </property>
+      
+      <!-- Hierarchy 4 Level Order --> 
+      <property name="eTLNDCustomAttribute34">
+        <doc>Custom Attribute 34</doc>
+        <value><strValue/></value>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>LevelOrder_3</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Hier 3 Level Order</strValue></value></metadata>
+        <metadata name="maxLength"><value><intValue>21</intValue></value></metadata>
+      </property>
+  
+      <!-- Boolean Dialog Type Attribute -->       			
+      <property name="eTLNDCustomAttribute35">
+        <doc>Custom Attribute 35</doc>
+        <value><enumValue def="YesNoBool">0</enumValue></value>
+        <metadata name="isStoreNumeric"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="isJavaObject"><value><boolValue>false</boolValue></value></metadata>
+        <metadata name="isDynamic"><value><boolValue>true</boolValue></value></metadata>
+        <metadata name="connectorMapTo"><value><strValue>Custom_Boolean</strValue></value></metadata>
+				<metadata name="displayName"><value><strValue>Boolean</strValue></value></metadata>
+      </property>
+      
+    </class>
+  </namespace>
+</model>

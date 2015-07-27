@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="rsa7">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.rsa7.RSA7MetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+
+                    <!-- For an example of how pool configuration settings can be specified,
+                        look at JNDI connector's conf/connector.xml
+                <property name="poolConfig">
+                    <bean class="com.ca.commons.cfg.GenericObjectPoolConfigBeanWrapper">
+                            ....
+                    </bean>
+                </property>
+                -->
+
+				<!-- Note: Commenting out static setting is a useful speed-up when testing as allows
+		            new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+		            eTOpBindingsMetaData on the Connector Type (aka Namespace).
+		            Once testing is complete you may want to consider saving final metadata and scripts (in the opbindings metadata) to a file under revision control and
+		            then set this flag to false to lock the connector down.
+						
+					!!!CAUTION: consider implications carefully when used in production
+					-->
+				<property name="allowMetadataModify">
+		            <value>true</value>
+		        </property>
+      
+         		<!-- For some objects, till RSA provides filtering support on at least naming attribute -->
+				<property name="allowNonFilterableNamingAttrs">
+		            <value>true</value>
+		        </property>
+ 
+                <property name="poolConfig">
+                    <bean class="com.ca.commons.cfg.GenericObjectPoolConfigBeanWrapper" lazy-init="default" autowire="default" dependency-check="default">
+                        <!--refer to Jakarta Commons Pool documentation
+                        http://jakarta.apache.org/commons/pool/apidocs/org/apache/commons/pool/impl/GenericObjectPool.html
+                            for complete listing of configurable settings. -->
+
+                        <!-- The maximum number of active connections that can be allocated from this
+                            pool at the same time, negative for no limit. -->
+                        <property name="maxActive">
+<value>100</value>
+</property>
+
+                        <!-- The minimum number of connections that can remain idle in the pool, without extra ones
+                            being created, or zero to create none. Best to create it on demand instead. -->
+                        <!--<property name="minIdle"><value>1</value></property>-->
+
+                        <!-- The maximum number of connections that can remain idle in the pool, without extra
+                            ones being released, or negative for no limit. -->
+                        <property name="maxIdle">
+<value>100</value>
+</property>
+
+                        <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                        <!--<property name="maxWait">-1</property>-->
+
+                            <!-- The minimum amount of time an object may sit idle in the pool before it is eligable
+                                for eviction.
+                                10 * 60 * 1000 = 10 minutes -->
+                        <property name="minEvictableIdleTimeMillis">
+<value>600000</value>
+</property>
+                            <!-- The number of milliseconds to sleep between runs of the idle object evictor thread.
+                                1 * 60 * 1000 = 2 minutes -->
+                        <property name="timeBetweenEvictionRunsMillis">
+<value>60000</value>
+</property>
+                    </bean>
+                </property>
+
+                <property name="exceptionRetryMap">
+	                <map>
+	                    <!-- If any of these strings are found anywhere within a connection related
+	                     exception method, then they signify retriable errors -->
+	                    <entry key="BusyConnectionException">
+	                        <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+	                            <property name="tag">
+	                                <value>RetryOpProcessorProxy</value>
+	                            </property>
+	                            <property name="displayLogMessage">
+	                                <value>connection is busy (BusyConnectionException)</value>
+	                            </property>
+	                            <property name="resilientDelay">
+	                                <value>1</value>
+	                            </property>
+	                            <!-- 0 means no limit on retries, i.e. "retry forever" -->
+	                            <property name="resilientMaxRetries">
+	                                <value>6</value>
+	                            </property>
+	                            <property name="exceptionMessages">
+	                                <list>
+	                                    <!--add exception messages here for busy connection-->
+	                                </list>
+	                            </property>
+	                        </bean>
+	                    </entry>
+	                </map>
+            	</property>
+
+                <property name="validators">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                 <entry key="DATETIME">
+                                    <bean class="com.ca.jcs.validator.attr.DateTimeAttributeValidator" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                            </map>
+                        </property>
+                    </bean>
+                </property>
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                <entry key="DATETIME">
+                                    <bean class="com.ca.jcs.rsa7.converter.RSA7DateTimeAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                                <entry key="BOOL">
+                                    <bean class="com.ca.jcs.rsa7.converter.RSA7BoolAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                                <entry key="ENUM">
+                                    <bean class="com.ca.jcs.rsa7.converter.RSA7EnumAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                            </map>
+                        </property>
+						<property name="propertyPluginConfigs">
+							<list>
+								<bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+								   <property name="pluginClass">
+									   <value>com.ca.jcs.rsa7.converter.RSA7DNPropertyConverter</value>
+								   </property>
+								   <property name="metadataPropNames">
+									   <list>
+    			                           <value>DNLdapObjectClass</value>
+                               			   <value>DNLdapObjectClasses</value>
+    			                           <value>isDNAbsolute</value>
+    			                           <value>DNTestExists</value>
+    			                           <value>DNNameOnly</value>
+									   </list>
+								   </property>
+							   </bean>
+							</list>
+						</property>
+                     </bean>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>false</value>
+                </property>
+
+                <!-- Page size for search in RSA endpoint. Affects only objects where RSA AM SDK provides paging search support
+                     (accounts, groups and tokens for RSA 7.1 SP3/SP4 SDK; RSA AM 8.0 SDK also supports admin roles and authentication
+                     agents).
+                     RSA recommends that the value does not exceed 1000.
+                     Setting the page size to higher value may result in slow performance of the RSA AM server, this connector, or both.
+                     Other problems may also appear, like transaction timeouts, thread lockup timeouts or other timeout errors. -->
+                <property name="pageSize">
+                    <value>500</value>
+                </property>
+
+                <!-- If true then a search requesting all attributes be returned (search control's return attribute IDs array is null),
+                     will only returned attributes not marked as "expensive" in the metadata (e.g. photographs or associative relationships).
+                     Expensive attributes can still be returned but must be explicitly requested. Note lookups requesting all attribute
+                     values will get both cheap and expensive ones, as only a single object is targeted. -->
+                <property name="searchExpensiveAttrs">
+                    <value>false</value>
+                </property>
+                
+                <property name="containerBaseObjectClass">
+                    <value>eTDYNDirectory</value>
+                </property>
+            </bean>
+</property>
+</bean>
+
+</beans>

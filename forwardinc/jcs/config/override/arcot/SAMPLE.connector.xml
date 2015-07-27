@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="arcot">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.arcot.ARCOTMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+                <property name="allowMetadataModify">
+                    <value>true</value>
+                </property>
+                <property name="wsAxisClientTimeOutInMilliSeconds">
+                    <value>300000</value>
+                </property>
+                <property name="webFortAuthURLSuffix">
+                    <value>/services/WebFortAuthSvc</value>
+                </property>                 
+                <property name="webFortIssURLSuffix">
+                    <value>/services/WebFortIssuanceSvc</value>
+                </property> 
+                <property name="udsMgmtURLSuffix">
+                    <value>/services/ArcotUserRegistryMgmtSvc</value>
+                </property>   
+                <property name="udsURLSuffix">
+                    <value>/services/ArcotUserRegistrySvc</value>
+                </property>   
+                <property name="regFortAdmURLSuffix">
+                    <value>/services/RegFortAdminSvc</value>
+                </property>   
+                <property name="regFortProvURLSuffix">
+                    <value>/services/RegFortProvisioningSvc</value>
+                </property>    
+                <property name="regFortCLMURLSuffix">
+                    <value>/services/RegFortCertManagerSvc</value>
+                </property>                                 
+                <property name="otpProfileKey">
+                    <value>WF.OTP_PROFILE</value>
+                </property>    
+                <property name="arcotIdProfileKey">
+                    <value>WF.ARCOTID_PROFILE</value>
+                </property>
+                <property name="qnaProfileKey">
+                    <value>WF.QNA_PROFILE</value>
+                </property>                                              
+                <property name="userDeletedKey">
+                    <value>CA.ILM.WF.USER_DELETED</value>
+                </property>                                              
+                <property name="axis2ReUseHttpClient">
+                    <value>true</value>
+                </property>                                              
+                <property name="axis2TimeOutInMilliSeconds">
+                    <value>30000</value>
+                </property>                                              
+                <property name="axis2HttpProtocalVersion">
+                    <value>HTTP/1.0</value>
+                </property>
+                <property name="sslVerifyHostname">
+                    <value>true</value>
+                </property>
+                <property name="revocationReasonOnUserDelete">
+                	<value>Cessation Of Operation</value>
+                </property>
+                <property name="poolConfig">
+                    <bean class="com.ca.commons.cfg.GenericObjectPoolConfigBeanWrapper" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="maxActive">
+                            <value>-1</value>
+                        </property>
+                        <property name="maxIdle">
+                        	<value>10</value>
+                        </property>                        
+                        <property name="minEvictableIdleTimeMillis">
+                            <value>600000</value>
+                        </property>
+						<property name="timeBetweenEvictionRunsMillis">
+							<value>60000</value>
+						</property>                        
+                    </bean>
+                </property>
+				<property name="exceptionRetryMap">
+                    <map>
+                        <!-- If any of these strings are found anywhere within a connection related
+                             exception method, then they signify retry-able errors -->
+						<entry key="NormalConnectionException">
+                            <!-- Normal retry case for (possibly/probably) transient failure conditions. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection (NormalConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>30000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>3</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+  	                                  <value>Connection refused: connect</value>
+  	                                  <value>failed to respond</value>  	                                  
+  	                                  <value>internal error</value>
+  	                                  <value>Database is not running</value>
+									  <value>Connection reset</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+	            	</map>
+            	</property>                
+				<property name="converters">
+					<bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+						<property name="typeToPluginMap">
+							<map>
+								<entry key="BOOL">
+									<bean class="com.ca.jcs.converter.attr.BoolAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+								</entry>
+                                <entry key="DATETIME">
+									<bean class="com.ca.jcs.arcot.converter.ARCOTDateTimeAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>                                        
+                                </entry>								
+		                    </map>
+		                </property>
+					 </bean>					 
+				</property>  			               
+            </bean>
+</property>
+</bean>
+
+</beans>

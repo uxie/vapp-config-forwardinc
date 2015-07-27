@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="scim">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.scim.SCIMMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+
+				<!-- Note: Commenting out static setting is a useful speed-up when testing as allows
+		            new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+		            eTOpBindingsMetaData on the Connector Type (aka Namespace).
+		            Once testing is complete you may want to consider saving final metadata and scripts (in the opbindings metadata) to a file under revision control and
+		            then set this flag to false to lock the connector down.
+						
+					!!!CAUTION: consider implications carefully when used in production
+					-->
+				<property name="allowMetadataModify">
+		            <value>true</value>
+		        </property>
+		        
+		        <!-- For the SCIM implementations that do not support filtering at all -->
+				<property name="allowNonFilterableNamingAttrs">
+		            <value>true</value>
+		        </property>
+
+				<!-- the following two are for the configuration of the org.apache.http.impl.conn.PoolingClientConnectionManager -->
+				<!-- total maximum number of connections for the pool -->		        
+		        <property name="maxHttpConnectionTotal">
+		            <value>12</value>
+		        </property>
+		        <!-- maximum number of connections per route -->
+		        <property name="maxHttpConnectionPerRoute">
+		            <value>6</value>
+		        </property>
+
+                <property name="exceptionRetryMap">
+                    <map>
+                       <!-- If any of these strings are found anywhere within a connection related
+                            exception method, then they signify retriable errors -->
+                        <entry key="NormalConnectionException">
+                            <!-- Normal retry case for (possibly/probably) transient failure conditions. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection (NormalConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                      <value>refused</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+
+            			<entry key="StaleConnectionException">
+                            <!-- Stale connections are only retried once. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is stale (StaleConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>1</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                      <!--<value></value>-->
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+
+                        <entry key="BusyConnectionException">
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is busy (BusyConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>60000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <value>Server Busy</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+	            	</map>
+            	</property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>true</value>
+                </property>
+
+                <!-- If true then a search requesting all attributes be returned (search control's return attribute ids array is null),
+                     will only returned attributes not marked as "expensive" in the matadata (e.g. photographs or associative relationships).
+                     Expensive attributes can still be returned but must be explicitly requested. Note lookups requesting all attribute
+                     values will get both cheap and expensive ones, as only a single object is targetted. -->
+                <property name="searchExpensiveAttrs">
+                    <value>false</value>
+                </property>
+                
+                <property name="containerBaseObjectClass">
+                    <value>eTDYNDirectory</value>
+                </property>
+            </bean>
+</property>
+</bean>
+
+</beans>

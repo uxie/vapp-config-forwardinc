@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="krbscript">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.stub.StubMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+
+				<!-- Note: Commenting out static setting is a useful speed-up when testing as allows
+		            new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+		            eTOpBindingsMetaData on the Connector Type (aka Namespace).
+		            Once testing is complete you may want to consider saving final metadata and scripts (in the opbindings metadata) to a file under revision control and
+		            then set this flag to false to lock the connector down.
+						
+					NOTE: make sure you understand the implications of setting to true in production
+					-->
+				<property name="allowMetadataModify">
+		            <value>false</value>
+		        </property>
+        
+        		<!-- For password policy object, until such time as the connector provides filtering in the name. -->
+				<property name="allowNonFilterableNamingAttrs">
+		            <value>true</value>
+		        </property>
+		        
+                <property name="behaviourSearchSingleClass">
+                    <value>true</value>
+                </property>
+                <property name="objectClassRequired">
+                    <value>true</value>
+                </property>                
+                <property name="indirectAssociations">
+                    <value>false</value>
+                </property>
+
+                    <!-- Example of how a built-in plug-in can be configured via XML. -->
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="classPluginConfigs">
+                            <list>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.krbscript.converter.KrbscriptAccountClassConverter</value>
+                                    </property>
+                               </bean>
+                            </list>
+                        </property>
+                        <property name="typeToPluginMap">
+                          <map>
+                              <entry key="BOOL">
+                                    <!-- We set isNumeric=false which means 0/1 will be taken in from
+                                        LDAP and stored as true/false in the persisted property files. This
+                                        Spring XML causes the code "new BoolAttributeConverter(false)" to be called. -->
+                                 <bean class="com.ca.jcs.converter.attr.BoolAttributeConverter" lazy-init="default" autowire="default" dependency-check="default">
+                                     <constructor-arg>
+<value>false</value>
+</constructor-arg>
+                                 </bean>
+                              </entry>
+                          </map>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="exceptionRetryMap">
+                    <map>
+                        <!-- If any of these strings are found anywhere within a connection related
+                 exception method, then they signify retriable errors -->
+                        <entry key="NormalConnectionException">
+
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is lost (NormalConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>1000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <value>Communication failure</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+                    </map>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>false</value>
+                </property>
+
+            </bean>
+</property>
+</bean>
+
+</beans>
