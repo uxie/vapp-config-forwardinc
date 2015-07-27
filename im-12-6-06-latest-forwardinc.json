@@ -146,7 +146,7 @@
                       "value": "forwardinc/appsrv"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/im-server:12.6.06.latest",
+                  "image": "store.vapp-security.solutions/imag/im-server:12.6.06",
                   "livenessProbe": {
                     "httpGet": {
                       "path": "/iam/im/forwardinc",
@@ -430,7 +430,7 @@
                       "value": "forwardinc/provsrv"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/im-prov-server:12.6.06.latest",
+                  "image": "store.vapp-security.solutions/imag/im-prov-server:12.6.06",
                   "name": "provsrv",
                   "ports": [
                     {
@@ -520,7 +520,7 @@
                       "value": "forwardinc/jcs"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/connector-server:12.6.06.latest",
+                  "image": "store.vapp-security.solutions/imag/connector-server:12.6.06",
                   "name": "connserver",
                   "ports": [
                     {

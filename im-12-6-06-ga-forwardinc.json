@@ -41,7 +41,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -127,7 +127,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -230,7 +230,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -316,7 +316,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -411,7 +411,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -501,7 +501,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
