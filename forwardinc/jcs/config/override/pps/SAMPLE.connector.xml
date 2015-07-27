@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="ppsImplBundle">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.meta.MetaPoolingConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+            
+				<!-- Note: Commenting out static setting is a useful speed-up when testing as allows
+		            new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+		            eTOpBindingsMetaData on the Connector Type (aka Namespace).
+		            Once testing is complete you may want to consider saving final metadata and scripts (in the opbindings metadata) to a file under revision control and
+		            then set this flag to false to lock the connector down.
+						
+					NOTE: make sure you understand the implications of setting to true in production
+					-->
+				<property name="allowMetadataModify">
+		            <value>false</value>
+		        </property>
+        
+        		<!-- Believe it or not, the PPS provides no filtering at all (not even on naming attribute). -->
+				<property name="allowNonFilterableNamingAttrs">
+		            <value>true</value>
+		        </property>
+		        
+                <!--<property name="jndiEnv">
+                     Any values set here override defaults in the code 
+                    <map>
+                        <entry key="java.naming.factory.initial">
+                            <value>com.sun.jndi.ldap.LdapCtxFactory</value>
+                        </entry>
+                    </map>
+                </property>
+                -->
+
+                <property name="exceptionRetryMap">
+	                <map>
+	                    <!-- If any of these strings are found anywhere within a connection related
+	                     exception method, then they signify retriable errors -->
+	                    <entry key="NormalConnectionException">
+	                        <!-- Normal retry case for (possibly/probably) transient failure conditions. -->
+	                        <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+	                            <property name="tag">
+	                                <value>RetryOpProcessorProxy</value>
+	                            </property>
+	                            <property name="displayLogMessage">
+	                                <value>Server is busy</value>
+	                            </property>
+	                            <property name="resilientDelay">
+	                                <value>30000</value>
+	                            </property>
+	                            <!-- 0 means no limit on retries, i.e. "retry forever" -->
+	                            <property name="resilientMaxRetries">
+	                                <value>10</value>
+	                            </property>
+	                            <property name="exceptionMessages">
+	                                <list>
+	                                  <value>TPENOENT</value>
+	                                  <value>UpdatePSLOCK</value>
+	                                  <value>Failed to establish PSBusComp service context</value>
+	                                </list>
+	                            </property>
+	                        </bean>
+	                    </entry>
+
+	                </map>
+            	</property>
+
+                <property name="poolConfig">
+                    <bean class="com.ca.commons.cfg.GenericObjectPoolConfigBeanWrapper" lazy-init="default" autowire="default" dependency-check="default">
+                        <!--refer to Jakarta Commons Pool documentation
+                        http://jakarta.apache.org/commons/pool/apidocs/org/apache/commons/pool/impl/GenericObjectPool.html
+                            for complete listing of configurable settings. -->
+
+                        <!-- The maximum number of active connections that can be allocated from this
+                            pool at the same time, negative for no limit. -->
+                        <property name="maxActive">
+<value>10</value>
+</property>
+
+                        <!-- The minimum number of connections that can remain idle in the pool, without extra ones
+                            being created, or zero to create none. Best to create it on demand instead. -->
+                        <!--<property name="minIdle"><value>1</value></property>-->
+
+                        <!-- The maximum number of connections that can remain idle in the pool, without extra
+                            ones being released, or negative for no limit. -->
+                        <property name="maxIdle">
+<value>10</value>
+</property>
+
+                        <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                        <!--<property name="maxWait">-1</property>-->
+
+                            <!-- The minimum amount of time an object may sit idle in the pool before it is eligable
+                                for eviction.
+                                10 * 60 * 1000 = 10 minutes -->
+                        <property name="minEvictableIdleTimeMillis">
+<value>600000</value>
+</property>
+                            <!-- The number of milliseconds to sleep between runs of the idle object evictor thread.
+                                1 * 60 * 1000 = 2 minutes -->
+                        <property name="timeBetweenEvictionRunsMillis">
+<value>60000</value>
+</property>
+                    </bean>
+                </property>                
+                
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                <entry key="FLEXI_STR:PPSDate">
+                                    <bean class="com.ca.jcs.pps.converter.PPSDateAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                            </map>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>true</value>
+                </property>
+                
+            </bean>
+</property>
+</bean>
+
+</beans>

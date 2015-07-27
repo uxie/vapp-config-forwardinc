@@ -1,0 +1,37 @@
+
+PROP_FILE=/solution${CONFIG}/data/jcs_external.properties
+
+jcs_jmsCredentials_password=`${JCS_HOME_DIR}/parser.sh jcs_jmsCredentials_password $PROP_FILE`
+encryptPWD=${jcs_jmsCredentials_password:5}
+proxyCCSManager_enabled=`${JCS_HOME_DIR}/parser.sh proxyCCSManager_enabled $PROP_FILE`
+proxyConnectionConfig_proxyServerHostname=`${JCS_HOME_DIR}/parser.sh proxyConnectionConfig_proxyServerHostname $PROP_FILE`
+proxyConnectionConfig_proxyServerUseSsl=`${JCS_HOME_DIR}/parser.sh proxyConnectionConfig_proxyServerUseSsl $PROP_FILE`
+httpProxyConfiguration_enabled=`${JCS_HOME_DIR}/parser.sh httpProxyConfiguration_enabled $PROP_FILE`
+endpointManagementService_managementVisible=`${JCS_HOME_DIR}/parser.sh endpointManagementService_managementVisible $PROP_FILE`
+standaloneConfiguration_enabled=`${JCS_HOME_DIR}/parser.sh standaloneConfiguration_enabled $PROP_FILE`
+standaloneConfiguration_domain=`${JCS_HOME_DIR}/parser.sh standaloneConfiguration_domain $PROP_FILE`
+connectorPersister_enabled=`${JCS_HOME_DIR}/parser.sh connectorPersister_enabled $PROP_FILE`
+jcs_fips_enabled=`${JCS_HOME_DIR}/parser.sh jcs_fips_enabled $PROP_FILE`
+
+# copy user config override folder into jcs/conf/override/
+cp -r /solution${CONFIG}/config/override/* $JCS_HOME_DIR/conf/override/ 
+
+# replace placeholders in jcs config properties
+sed -i "s/@jcs_jmsCredentials_password@/$jcs_jmsCredentials_password/g" $JCS_HOME_DIR/conf/override/server_ad.properties
+sed -i "s/@jcs_fips_enabled@/$jcs_fips_enabled/g" $JCS_HOME_DIR/conf/override/server_ad.properties
+sed -i "s/@proxyCCSManager_enabled@/$proxyCCSManager_enabled/g" $JCS_HOME_DIR/conf/override/server_ccs.properties
+sed -i "s/@jcs_jmsCredentials_password@/$jcs_jmsCredentials_password/g" $JCS_HOME_DIR/conf/override/server_ccs.properties
+sed -i "s/@proxyCCSManager_enabled@/$proxyCCSManager_enabled/g" $JCS_HOME_DIR/conf/override/server_ccs.properties
+sed -i "s/@proxyConnectionConfig_proxyServerHostname@/$proxyConnectionConfig_proxyServerHostname/g" $JCS_HOME_DIR/conf/override/server_ccs.properties
+sed -i "s/@proxyConnectionConfig_proxyServerUseSsl@/$proxyConnectionConfig_proxyServerUseSsl/g" $JCS_HOME_DIR/conf/override/server_ccs.properties
+sed -i "s/@httpProxyConfiguration_enabled@/$httpProxyConfiguration_enabled/g" $JCS_HOME_DIR/conf/override/server_jcs.properties
+sed -i "s/@jcs_jmsCredentials_password@/$jcs_jmsCredentials_password/g" $JCS_HOME_DIR/conf/override/server_jcs.properties
+sed -i "s/@JsafeJCE_fipsEnabled@/$jcs_fips_enabled/g" $JCS_HOME_DIR/conf/override/server_jcs.properties
+sed -i "s/@endpointManagementService_managementVisible@/$endpointManagementService_managementVisible/g" $JCS_HOME_DIR/conf/override/server_ui.properties
+sed -i "s/@jcs_jmsCredentials_password@/$jcs_jmsCredentials_password/g" $JCS_HOME_DIR/conf/override/server_common.properties
+sed -i "s/@standaloneConfiguration_enabled@/$standaloneConfiguration_enabled/g" $JCS_HOME_DIR/conf/override/server_jcs_standalone.properties
+sed -i "s/@standaloneConfiguration_domain@/$standaloneConfiguration_domain/g" $JCS_HOME_DIR/conf/override/server_jcs_standalone.properties
+sed -i "s/@connectorPersister_enabled@/$connectorPersister_enabled/g" $JCS_HOME_DIR/conf/override/server_jcs_standalone.properties
+sed -i "s/@jcs_jmsCredentials_password@/$jcs_jmsCredentials_password/g" $JCS_HOME_DIR/conf/override/server_shared.properties
+sed -i "s/@jcs_jmsCredentials_password@/$encryptPWD/g" $CONNECTOR_SERVER_HOME/etc/system.properties
+

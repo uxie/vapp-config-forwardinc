@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="jndi">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.jndi.JNDIMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+
+                <!--  Set to true to allow metadata changes via LDAP MODIFY  -->
+                <property name="allowMetadataModify">
+                    <value>true</value>
+                </property>
+
+                <property name="checkObjectExistenceForDeletion">
+                    <value>true</value>
+                </property>
+
+                <property name="jndiEnv">
+                    <!-- Any values set here override defaults in the code -->
+                    <map>
+                        <entry key="java.naming.factory.initial">
+                            <value>com.sun.jndi.ldap.LdapCtxFactory</value>
+                        </entry>
+                    </map>
+                </property>
+                <!--
+                    protect against endpoint that advertise paged results but don't deliver. <property
+                    name="forcePagedResults"> <value>false</value> </property>
+                -->
+
+                <!-- cache related settings -->
+                <property name="cachingRequired">
+                    <value>false</value>
+                </property>
+				<!-- Deactivating cache manager too, as otherwise creates memory-expensive EHCacheManager which never gets used,
+					so uncomment below if ever turn cachingRequired on. -->
+                <!--property name="cacheManagerClass">
+                    <value>com.ca.jcs.cache.EHCacheManager</value>
+                </property>
+                <property name="cacheManagerConfigReference">
+                    <value>../conf/ehcache.xml</value>
+                </property-->
+
+
+                <property name="exceptionRetryMap">
+                    <map>
+                        <!--
+                            If any of these strings are found anywhere within a connection related exception method,
+                            then they signify retriable errors
+                        -->
+                        <entry key="NormalConnectionException">
+                            <!-- Normal retry case for (possibly/probably) transient failure conditions. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is lost (NormalConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <value>Connection refused</value>
+                                        <value>Connection reset</value>
+                                        <value>Socket closed</value>
+                                        <value>Connection timed out</value>
+                                        <value>Connection closed</value>
+                                        <value>No route to host</value>
+                                        <!--Disabled service on the Oracle directory machine-->
+                                        <value>[LDAP: error code 1 - Operations Error]</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+                        <entry key="StaleConnectionException">
+                            <!-- Stale connections are only retried once. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is stale (StaleConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>1</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <!--add exception messages here for stale connection-->
+                                        <!--<value>To be specified</value>-->
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+                        <entry key="BusyConnectionException">
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is busy (BusyConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>60000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <!--add exception messages here for busy connection-->
+                                        <!--<value>To be specified</value>-->
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+                    </map>
+                </property>
+
+                <property name="poolConfig">
+                    <bean class="com.ca.commons.cfg.GenericObjectPoolConfigBeanWrapper" lazy-init="default" autowire="default" dependency-check="default">
+                        <!--
+                            refer to Jakarta Commons Pool documentation
+                            http://jakarta.apache.org/commons/pool/apidocs/org/apache/commons/pool/impl/GenericObjectPool.html
+                            for complete listing of configurable settings.
+                        -->
+
+                        <!--
+                            The maximum number of active connections that can be allocated from this pool at the same
+                            time, negative for no limit.
+                        -->
+                        <property name="maxActive">
+                            <value>20</value>
+                        </property>
+
+                        <!--
+                            The minimum number of connections that can remain idle in the pool, without extra ones being
+                            created, or zero to create none. Best to create it on demand instead.
+                        -->
+                        <property name="minIdle">
+                            <value>0</value>
+                        </property>
+
+                        <!--
+                            The maximum number of connections that can remain idle in the pool, without extra ones being
+                            released, or negative for no limit.
+                        -->
+                        <property name="maxIdle">
+                            <value>-1</value>
+                        </property>
+
+                        <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                        <!--<property name="maxWait">-1</property>-->
+
+                        <!--
+                            The minimum amount of time an object may sit idle in the pool before it is eligable for
+                            eviction. 10 * 60 * 1000 = 10 minutes
+                        -->
+                        <property name="minEvictableIdleTimeMillis">
+                            <value>600000</value>
+                        </property>
+                        <!--
+                            The number of milliseconds to sleep between runs of the idle object evictor thread. 1 * 60 *
+                            1000 = 2 minutes
+                        -->
+                        <property name="timeBetweenEvictionRunsMillis">
+                            <value>60000</value>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>false</value>
+                </property>
+
+                <!-- not mapped in metadata, but still sent by admin during role syncs etc so want to handle gracefully. -->
+                <property name="acceptedUnknownAttrIds">
+                    <list>
+                        <value>eTSuspended</value>
+                    </list>
+                </property>
+                <!--
+                If there is a Reverse association on Group membership, then on user search for memberOf groups, 
+                the retrieving 'member' attribute is causing delays in search of user Groups if the Group has more number of users assigned to it (Eg: >= 8000). 
+     			To avoid this delay, user can set 'reverseAssocOnGroupMember' property to true. 
+     			If it is set to true, we don't need to set the 'member' attribute in the search return attributes list. 
+                 -->
+				<property name="reverseAssocOnGroupMember">
+					<value>false</value>
+				</property>
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                <entry key="DATETIME">
+                                    <bean class="com.ca.jcs.converter.attr.GeneralizedTimeAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                            </map>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+</property>
+</bean>
+
+</beans>

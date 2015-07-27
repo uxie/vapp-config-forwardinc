@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="sdkscript">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.stub.StubMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+
+				<!--  Set to true to allow metadata / opbindings changes via
+            			LDAP MODIFY  -->
+				<property name="allowMetadataModify">
+		            <value>true</value>
+		        </property>
+
+                <property name="autoDirectAssocRequired">
+                    <value>true</value>
+                </property>
+
+                <property name="behaviourSearchSingleClass">
+                    <value>true</value>
+                </property>
+                <property name="objectClassRequired">
+                    <value>true</value>
+                </property>
+                <property name="indirectAssociations">
+                    <value>false</value>
+                </property>
+
+                <property name="validators">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                    <!--defines a validator for attributes which should not contain
+                                        commas in their values -->
+                                <!-- Disabled, can use with SDK only 
+                                <entry key="FLEXI_STR:noComma">
+                                    <bean class="com.ca.jcs.sdk.validator.NoCommaAttributeValidator"/>
+                                </entry>
+                                -->
+                            </map>
+                        </property>
+                    </bean>
+                </property>
+                    <!-- Example of how a built-in plug-in can be configured via XML. -->
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                          <map>
+                              <entry key="BOOL">
+                                    <!-- We set isNumeric=false which means 0/1 will be taken in from
+                                        LDAP and stored as true/false in the persisted property files. This
+                                        Spring XML causes the code "new BoolAttributeConverter(false)" to be called. -->
+                                 <bean class="com.ca.jcs.converter.attr.BoolAttributeConverter" lazy-init="default" autowire="default" dependency-check="default">
+                                     <constructor-arg>
+<value>false</value>
+</constructor-arg>
+                                 </bean>
+                              </entry>                             
+                          </map>
+                        </property>
+                        <property name="propertyPluginConfigs">
+          					<list>
+				               <!-- Demonstrate alternative flattener to the DemoFlattenPropertyConverter used by other SDK variants. -->
+				               <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+				                    <property name="pluginClass">
+				                        <value>com.ca.jcs.converter.meta.MultiValuePropertyFlattener</value>
+				                    </property>
+				                    <property name="pluginConfig">
+				                        <bean class="com.ca.jcs.converter.meta.MultiValuePropertyFlattener$StyleConfig" lazy-init="default" autowire="default" dependency-check="default">
+				                            <property name="activeByDefault" value="true"/>
+				                            <property name="defaultStyle" value="XML"/>
+				                            <property name="exclusive" value="true"/>
+				                        </bean>
+				                    </property>
+				                    <property name="metadataPropNames">
+				                        <list>
+				                            <value>isMultiValued</value>
+				                        </list>
+				                    </property>
+				               </bean>
+          						<!-- Could also trigger the converter by explicit types if desired... 
+				               <bean class="com.ca.jcs.cfg.MetaPluginConfig">
+				                    <property name="pluginClass">
+				                        <value>com.ca.jcs.converter.meta.MultiValuePropertyFlattener</value>
+				                    </property>
+				                    <property name="type" value="FLEXI_STR:noComma"/>
+				               </bean>
+				               <bean class="com.ca.jcs.cfg.MetaPluginConfig">
+				                    <property name="pluginClass">
+				                        <value>com.ca.jcs.converter.meta.MultiValuePropertyFlattener</value>
+				                    </property>
+				                    <property name="type" value="FLEXI_STR:DN"/>
+				               </bean>
+				               -->
+          					</list>
+          				</property>
+                    </bean>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>false</value>
+                </property>
+
+                <property name="poolConfig">
+                		<!-- Should use class in com.ca.commons.cfg instead, but using the deprecated
+                			class here to make sure it works properly for backward compatibility -->
+                    <bean class="com.ca.jcs.cfg.GenericObjectPoolConfigBeanWrapper" lazy-init="default" autowire="default" dependency-check="default">
+                        <!--refer to Jakarta Commons Pool documentation
+                        http://jakarta.apache.org/commons/pool/apidocs/org/apache/commons/pool/impl/GenericObjectPool.html
+                            for complete listing of configurable settings. -->
+
+                        <!-- The maximum number of active connections that can be allocated from this
+                            pool at the same time, negative for no limit. -->
+                        <property name="maxActive">
+                            <value>10</value>
+                        </property>
+
+                        <!-- The minimum number of connections that can remain idle in the pool, without extra ones
+                            being created, or zero to create none. Best to create it on demand instead. -->
+                        <!--<property name="minIdle"><value>1</value></property>-->
+
+                        <!-- The maximum number of connections that can remain idle in the pool, without extra
+                            ones being released, or negative for no limit. -->
+                        <property name="maxIdle">
+                            <value>4</value>
+                        </property>
+
+                        <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                        <!--<property name="maxWait">-1</property>-->
+
+                        <!-- The minimum amount of time an object may sit idle in the pool before it is eligable
+                            for eviction.
+                            10 * 60 * 1000 = 10 minutes -->
+                        <property name="minEvictableIdleTimeMillis">
+                            <value>600000</value>
+                        </property>
+                        <!-- The number of milliseconds to sleep between runs of the idle object evictor thread.
+                             1 * 60 * 1000 = 2 minutes -->
+                        <property name="timeBetweenEvictionRunsMillis">
+                            <value>60000</value>
+                        </property>
+                    </bean>
+                </property>
+
+            </bean>
+</property>
+</bean>
+
+</beans>

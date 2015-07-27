@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="lnd">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.lnd.LNDConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+            
+				<!-- Note: Commenting out static setting is a useful speed-up when testing as allows
+		            new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+		            eTOpBindingsMetaData on the Connector Type (aka Namespace).
+		            Once testing is complete you may want to consider saving final metadata and scripts (in the opbindings metadata) to a file under revision control and
+		            then set this flag to false to lock the connector down.
+						
+					NOTE: make sure you understand the implications of setting to true in production. It defaults to true so that the
+					LND custom attributes can be mapped in Connector Xpress. If these mappings are not required, or once such custom
+					edits are complete, this flag can be set to false using the override/conf/ file (as described in the JCS
+					Implementation Guide).
+					-->
+				<property name="allowMetadataModify">
+		            <value>true</value>
+		        </property>
+				<property name="reverseAssocOnGroupMember">
+					 <value>true</value>
+				</property>
+				<property name="modifyGroupAttributeRequest">
+					 <value>true</value>
+				</property>
+        
+				<property name="exceptionRetryMap">
+                    <map>
+                            <!-- If any of these strings are found anywhere within a connection related
+                                exception method, then they signify retriable errors -->
+                        <entry key="NormalConnectionException">
+                                <!-- Normal retry case for (possibly/probably) transient failure conditions. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection (NormalConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+
+	                                  <value>Connection refused</value>
+	                                  <value>Connection reset</value>
+	                                  <value>Socket closed</value>
+	                                  <value>Connection timed out</value>
+	                                  <value>Connection closed</value>
+	                                  <value>No route to host</value>
+									  <value>An existing connection was forcibly closed by the remote host</value>
+
+									  <value>communications failure</value>
+									  <value>Could not get IOR from Domino Server</value>
+									  <value>Pool not open</value>
+
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+						<entry key="StaleConnectionException">
+                                <!-- Stale connections are only retried once. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is stale (StaleConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>10000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>1</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                      <value>Object no longer exists on server</value>
+
+                                      <value>No more data to read from socket</value>
+                                      <value>socket creation error</value>
+                                      <value>socket write error</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+                        <entry key="BusyConnectionException">
+                                <!-- Lotus notes  been observed reporting deadlock exceptions
+                                    when it takes too long to complete a transaction - so we take them to mean that
+                                    the endpoint is under too much load and we back off with a long retry delay. -->
+                            <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="tag">
+                                    <value>RetryOpProcessorProxy</value>
+                                </property>
+                                <property name="displayLogMessage">
+                                    <value>connection is busy (BusyConnectionException)</value>
+                                </property>
+                                <property name="resilientDelay">
+                                    <value>60000</value>
+                                </property>
+                                <!-- 0 means no limit on retries, i.e. "retry forever" -->
+                                <property name="resilientMaxRetries">
+                                    <value>6</value>
+                                </property>
+                                <property name="exceptionMessages">
+                                    <list>
+                                        <value>Deadlock</value>
+                                    </list>
+                                </property>
+                            </bean>
+                        </entry>
+	            </map>
+            </property>
+            <property name="poolConfig">
+                <bean class="com.ca.commons.cfg.GenericObjectPoolConfigBeanWrapper" lazy-init="default" autowire="default" dependency-check="default">
+                    <!--refer to Jakarta Commons Pool documentation
+                    http://jakarta.apache.org/commons/pool/apidocs/org/apache/commons/pool/impl/GenericObjectPool.html
+                        for complete listing of configurable settings. -->
+
+                    <!-- The maximum number of active connections that can be allocated from this
+                        pool at the same time, negative for no limit. We set this very large due to
+                        the LND CORBA API's very poor API regarding recycling() of objects which are
+                        referenced by multiple pointers within the same session. -->
+                    <property name="maxActive">
+<value>250</value>
+</property>
+
+                    <!-- The minimum number of connections that can remain idle in the pool, without extra ones
+                        being created, or zero to create none. Best to create it on demand instead. -->
+                    <!--<property name="minIdle"><value>1</value></property>-->
+
+                    <!-- The maximum number of connections that can remain idle in the pool, without extra
+                        ones being released, or negative for no limit. -->
+                    <property name="maxIdle">
+<value>4</value>
+</property>
+
+                    <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                    <!--<property name="maxWait">-1</property>-->
+
+                        <!-- The minimum amount of time an object may sit idle in the pool before it is eligible
+                            for eviction.
+                            10 * 60 * 1000 = 10 minutes -->
+                    <property name="minEvictableIdleTimeMillis">
+<value>600000</value>
+</property>
+                        <!-- The number of milliseconds to sleep between runs of the idle object eviction thread.
+                            2 * 60 * 1000 = 2 minutes -->
+                    <property name="timeBetweenEvictionRunsMillis">
+<value>120000</value>
+</property>
+<!-- 5 Minutes -->
+                </bean>
+            </property>
+
+            <property name="validateToConnector">
+                <value>true</value>
+            </property>
+
+            <property name="validateFromConnector">
+                <value>false</value>
+            </property>
+
+            <property name="caseSensitive">
+                <value>true</value>
+            </property>
+            
+            <!-- Uncomment this property to override the default functionality for searching for existing 
+                 short names.  Map databases to associated views that should be searched when determining
+                 if the shortn ame already exists.  Note only one view can be mapped per database -->         
+		    <!-- property name="shortNameSearchViews">
+		        <map>		        
+		            <entry key="names.nsf"><value>$Users</value></entry>
+                </map>
+		    </property -->		    
+		        
+            <property name="converters">
+                <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                    <property name="propertyPluginConfigs">
+                        <list>
+			               <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+			                   <property name="pluginClass">
+			                       <value>com.ca.jcs.lnd.LNDDNPropertyConverter</value>
+			                   </property>
+			                   <property name="metadataPropNames">
+			                       <list>
+			                           <value>DNLdapObjectClass</value>
+                           			   <value>DNLdapObjectClasses</value>
+			                           <value>isDNAbsolute</value>
+			                           <value>DNTestExists</value>
+			                           <value>DNNameOnly</value>
+			                       </list>
+			                   </property>
+			               </bean>
+                        		<!-- Force conversion to Java objects as this matches the LND API well. -->
+                            <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                <property name="pluginClass">
+                                    <value>com.ca.jcs.converter.meta.JavaObjectPropertyConverter</value>
+                                </property>
+                                <property name="pluginConfig">
+                                    <bean class="com.ca.jcs.converter.meta.JavaObjectPropertyConverter$Config" lazy-init="default" autowire="default" dependency-check="default">
+                                        <property name="activeByDefault">
+                                            <value>true</value>
+                                        </property>
+                                        <property name="conversionSettings">
+                                          <bean class="com.ca.commons.datamodel.DataModelValue$ConversionSettings" lazy-init="default" autowire="default" dependency-check="default">
+                                              <property name="boolsAsIntStrings">
+                                                  <value>true</value>
+                                              </property>
+                                              <property name="numericEnumsAsIntStrings">
+                                                  <value>true</value>
+                                              </property>
+                                          </bean>
+                                        </property>
+                                    </bean>
+                                </property>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+            </property>
+
+         </bean>
+</property>
+</bean>
+
+</beans>

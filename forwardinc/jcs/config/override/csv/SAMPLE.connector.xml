@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="csv">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.csv.CSVMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+
+                <!--
+                    Set to true to allow dynamic opbindings (aka Stored Procedures) to be 
+                    registered via LDAP MODIFY of Namespace.eTOpBindingsMetaData, as well
+                    as metadata changes.
+                -->
+                <property name="allowMetadataModify">
+                    <value>true</value>
+                </property>
+
+                <!-- Maximum time in seconds allocated to each transaction in seconds = 10 mins -->
+                <property name="transactionTimeout">
+                    <value>600</value>
+                </property>
+                <!-- Maximum time in seconds allocated to search transactions in seconds = 24 hrs -->
+                <property name="searchTimeout">
+                    <value>86400</value>
+                </property>
+
+                <property name="failOnUnknownAttrIds">
+                    <value>false</value>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>true</value>
+                </property>
+
+                <property name="searchExpensiveAttrs">
+                    <value>false</value>
+                </property>
+
+                <property name="validators">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+					    <property name="propertyPluginConfigs">
+				        	<list>
+				             	<bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+				                 	<property name="pluginClass">
+				                     	<value>com.ca.jcs.csv.validator.CSVFileEncodingPropertyValidator</value>
+				                 	</property>
+				                 	<property name="metadataPropNames">
+				                    	<list>
+				                         	<value>csvEndpointFileEncoding</value>
+				                     	</list>
+				                 	</property>
+				             	</bean>
+				             	<bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+				                 	<property name="pluginClass">
+				                     	<value>com.ca.jcs.csv.validator.CSVCronExpressionPropertyValidator</value>
+				                 	</property>
+				                 	<property name="metadataPropNames">
+				                    	<list>
+				                         	<value>csvEndpointCronExpression</value>
+				                     	</list>
+				                 	</property>
+				             	</bean>
+				        	</list>
+				      	</property>
+                    </bean>
+                </property>
+
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                <entry key="DATE">
+                                    <!--
+                                        Handle case where property is mapped to fixed-length CHAR column in database. 
+                                        DATETIME and TIME converters also do this internally.
+                                    -->
+                                    <bean class="com.ca.jcs.converter.attr.TrimAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                                <entry key="FLEXI_STR:quoteless">
+                                    <bean class="com.ca.jcs.converter.attr.RegexAttributeConverter" lazy-init="default" autowire="default" dependency-check="default">
+                                        <!-- style -->
+                                        <constructor-arg>
+                                            <value>perl5</value>
+                                        </constructor-arg>
+                                        <!-- regex -->
+                                        <constructor-arg>
+                                            <value>s/'//g</value>
+                                        </constructor-arg>
+                                    </bean>
+                                </entry>
+                            </map>
+                        </property>
+
+                        <property name="propertyPluginConfigs">
+                            <list>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.converter.meta.BoolPropertyConverter</value>
+                                    </property>
+                                    <property name="pluginConfig">
+                                        <bean class="com.ca.jcs.converter.meta.BoolPropertyConverter$BoolConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                            <property name="activeByDefault">
+                                                <value>false</value>
+                                            </property>
+                                            <property name="numeric">
+                                                <value>true</value>
+                                            </property>
+                                            <property name="order">
+                                                <value>100</value>
+                                            </property>
+                                        </bean>
+                                    </property>
+                                    <property name="metadataPropNames">
+                                        <list>
+                                            	<!-- take in true/false and pass 1/0 to connector. -->
+				                           <value>isStoreNumeric</value>
+				                                <!-- take in 1/0 and pass true/false to connector. -->
+				                           <value>isStoreSymbolic</value>
+				                                <!-- specify alternate representation for bools on endpoint -->
+				                           <value>boolValues</value>
+                                        </list>
+                                    </property>
+                                </bean>
+                                <!--<bean class="com.ca.jcs.cfg.MetaPluginConfig">-->
+                                <!--<property name="pluginClass">-->
+                                <!--<value>com.ca.jcs.converter.meta.JavaObjectPropertyConverter</value>-->
+                                <!--</property>-->
+                                <!--<property name="pluginConfig">-->
+                                <!--<bean class="com.ca.jcs.converter.meta.ConverterConfig">-->
+                                <!--<property name="activeByDefault"><value>true</value></property>-->
+                                <!--<property name="order"><value>200</value></property>-->
+                                <!--</bean>-->
+                                <!--</property>-->
+                                <!--
+                                    Specifying no metadata property names 
+                                    means checked against all properties, 
+                                    where plug-in constructor decides on relevance
+                                -->
+                                <!--</bean>-->
+                            </list>
+                        </property>
+                        <property name="classPluginConfigs">
+                            <list>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.csv.converter.SimpleDateFormatClassConverter</value>
+                                    </property>
+                               </bean>
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="dataSourceFactory">
+                    <bean class="com.ca.jdbc.DataSourceClassFactory" lazy-init="default" autowire="default" dependency-check="default"/>
+                </property>
+                <property name="dataSourceConfigProps">
+                    <props>
+                        <!--
+                            refer to http://jakarta.apache.org/commons/dbcp/configuration.html 
+                            for complete list and documentation of available configuration parameters
+                        -->
+
+                        <prop key="connectionProperties">fixedString=true</prop>
+                        <!-- The maximum number of active connections that can be allocated from this
+                            pool at the same time, or negative for no limit. -->
+                        <prop key="maxActive">20</prop>
+
+                        <!--
+                            The minimum number of connections that can remain idle in the pool, 
+                            without extra ones being created, or zero to create none. 
+                            Best to create it on demand instead.
+                        -->
+                        <!--<prop key="minIdle">1</prop>-->
+
+                        <!--
+                            The maximum number of connections that can remain idle in the pool, 
+                            without extra ones being released, or negative for no limit.
+                        -->
+                        <prop key="maxIdle">4</prop>
+
+                        <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                        <!--<prop key="maxWait">-1</prop>-->
+
+                        <!--
+                            The minimum amount of time an object may sit idle in the pool 
+                            before it is eligable for eviction. 10 * 60 * 1000 = 10 minutes
+                        -->
+                        <prop key="minEvictableIdleTimeMillis">600000</prop>
+                        <!-- The number of milliseconds to sleep between runs of the idle object evictor thread.
+                                1 * 60 * 1000 = 2 minutes -->
+                        <prop key="timeBetweenEvictionRunsMillis">60000</prop>
+                    </props>
+                </property>
+
+                <property name="quartzProperties">
+                    <props>
+                        <prop key="org.quartz.scheduler.skipUpdateCheck">true</prop>
+                        <!-- Configure Quartz ThreadPool -->
+                        <prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
+                        <prop key="org.quartz.threadPool.threadCount">1</prop>
+                        <prop key="org.quartz.threadPool.threadPriority">5</prop>
+                    </props>
+                </property>
+
+                <!-- Configure SMTP Properties.
+                	 See com.sun.mail.smtp package description in
+                	 https://javamail.java.net/nonav/docs/api/com/sun/mail/smtp/package-summary.html 
+                	 for all possible properties -->
+                <property name="smtpProperties">
+                    <props>
+                        <prop key="mail.smtp.host"/>
+                        <prop key="mail.smtp.port">25</prop>
+                        <!-- Send email via SMTP server using TLS connection.
+                        <prop key="mail.smtp.auth">true</prop>
+                        <prop key="mail.smtp.starttls.enable">true</prop>
+                        -->
+                        <!-- Send email via SMTP server using SSL connection.
+                        <prop key="mail.smtp.auth">true</prop>
+                        <prop key="mail.smtp.socketFactory.port">465</prop>
+                        <prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+                        -->
+                    </props>
+                </property>
+    			<!-- crytpo service for decrypting SMTP server password -->
+                <!-- <property name="cryptoService" ref="cryptoService"/> -->
+				<!-- Email address to send mail as -->
+                <property name="mailFromAddress">
+                    <value/>
+                </property>
+                <!-- Defines mail message encoding. -->
+                <property name="mailEncoding">
+                    <value>UTF-8</value>
+                </property>
+				<!-- SMTP server username -->
+                <property name="mailUsername">
+                    <value/>
+                </property>
+				<!-- SMTP server password
+				Should be encrypted using pwdtools application as following:
+				pwdtools -FIPS -p password -k JCS_HOME/conf/FIPSkey.dat
+				-->
+                <property name="mailPassword">
+                    <value/>
+                </property>
+
+                <!-- not mapped in metadata, but still sent by admin during role syncs etc so want to handle gracefully. -->
+                <property name="acceptedUnknownAttrIds">
+                    <list>
+                        <value>eTSuspended</value>
+                    </list>
+                </property>
+
+                <property name="virtualContainers">
+                    <list>
+                        <bean class="com.ca.jcs.VirtualContainerConfig" lazy-init="default" autowire="default" dependency-check="default">
+                            <property name="name">
+                                <value>Accounts</value>
+                            </property>
+                            <property name="objectClass">
+                                <value>eTDYNAccountContainer</value>
+                            </property>
+                            <property name="namingAttribute">
+                                <value>eTDYNAccountContainerName</value>
+                            </property>
+                            <property name="containedObjectClasses">
+                                <list>
+                                    <value>eTDYNAccount</value>
+                                </list>
+                            </property>
+                        </bean>
+                        <bean class="com.ca.jcs.VirtualContainerConfig" lazy-init="default" autowire="default" dependency-check="default">
+                            <property name="name">
+                                <value>Groups</value>
+                            </property>
+                            <property name="objectClass">
+                                <value>eTDYNGroupContainer</value>
+                            </property>
+                            <property name="namingAttribute">
+                                <value>eTDYNGroupContainerName</value>
+                            </property>
+                            <property name="containedObjectClasses">
+                                <list>
+                                    <value>eTDYNGroup</value>
+                                </list>
+                            </property>
+                        </bean>
+                    </list>
+                </property>
+                <!-- Defines maximum field length in a database. If maxLength (and/or MaxValue for integers)
+					 is not defined this value will be taken. Actual values will be truncated. -->
+                <property name="maxLength">
+                    <value>256</value>
+                </property>
+                <!-- Defines default encoding of CSV files. -->
+                <property name="defEncoding">
+                    <value>UTF-8</value>
+                </property>
+            </bean>
+</property>
+</bean>
+
+</beans>

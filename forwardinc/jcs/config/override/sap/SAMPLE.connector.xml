@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+    <bean class="com.ca.jcs.ImplBundle" parent="sap">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.sap.SAPMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+
+				<!-- Note: Commenting out static setting is a useful speed-up when testing as allows
+		            new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+		            eTOpBindingsMetaData on the Connector Type (aka Namespace).
+		            Once testing is complete you may want to consider saving final metadata and scripts (in the opbindings metadata) to a file under revision control and
+		            then set this flag to false to lock the connector down.
+						
+					NOTE: make sure you understand the implications of setting to true in production
+					-->
+				<property name="allowMetadataModify">
+		            <value>false</value>
+		        </property>
+        
+                <property name="streamingQueryThreshold">
+                    <value>100</value>
+                </property>
+                
+                <property name="exceptionRetryMap">
+	                <map>
+	                    <!-- If any of these strings are found anywhere within a connection related
+	                     exception method, then they signify retriable errors -->
+	                    <entry key="NormalConnectionException">
+	                        <!-- Normal retry case for (possibly/probably) transient failure conditions. -->
+	                        <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+	                            <property name="tag">
+	                                <value>RetryOpProcessorProxy</value>
+	                            </property>
+	                            <property name="displayLogMessage">
+	                                <value>connection is lost (NormalConnectionException)</value>
+	                            </property>
+	                            <property name="resilientDelay">
+	                                <value>10000</value>
+	                            </property>
+	                            <!-- 0 means no limit on retries, i.e. "retry forever" -->
+	                            <property name="resilientMaxRetries">
+	                                <value>6</value>
+	                            </property>
+	                            <property name="exceptionMessages">
+	                                <list>
+	                                  <value>JCO_ERROR_COMMUNICATION</value>
+	                                  <value>JCO_ERROR_SYSTEM_FAILURE</value>
+	                                  <value>JCO_ERROR_PROTOCOL</value>
+	                                </list>
+	                            </property>
+	                        </bean>
+	                    </entry>
+
+	                    <entry key="StaleConnectionException">
+	                        <!-- Stale connections are only retried once. -->
+	                        <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+	                            <property name="tag">
+	                                <value>RetryOpProcessorProxy</value>
+	                            </property>
+	                            <property name="displayLogMessage">
+	                                <value>connection is stale (StaleConnectionException)</value>
+	                            </property>
+	                            <property name="resilientDelay">
+	                                <value>10000</value>
+	                            </property>
+	                            <!-- 0 means no limit on retries, i.e. "retry forever" -->
+	                            <property name="resilientMaxRetries">
+	                                <value>1</value>
+	                            </property>
+	                            <property name="exceptionMessages">
+	                                <list>
+	                                  <!--add exception messages here for stale connection-->
+	                                  <!--<value>To be specified</value>-->
+	                                </list>
+	                            </property>
+	                        </bean>
+	                    </entry>
+
+	                    <entry key="BusyConnectionException">
+	                        <bean class="com.ca.jcs.cfg.ExceptionRetryGroup" lazy-init="default" autowire="default" dependency-check="default">
+	                            <property name="tag">
+	                                <value>RetryOpProcessorProxy</value>
+	                            </property>
+	                            <property name="displayLogMessage">
+	                                <value>connection is busy (BusyConnectionException)</value>
+	                            </property>
+	                            <property name="resilientDelay">
+	                                <value>60000</value>
+	                            </property>
+	                            <!-- 0 means no limit on retries, i.e. "retry forever" -->
+	                            <property name="resilientMaxRetries">
+	                                <value>6</value>
+	                            </property>
+	                            <property name="exceptionMessages">
+	                                <list>
+	                                    <!--add exception messages here for busy connection-->
+	                                    <value>JCO_ERROR_STATE_BUSY</value>
+	                                    <value>JCO_ERROR_RESOURCE</value>
+	                                    <value>JCO_ERROR_SERVER_STARTUP</value>
+	                                </list>
+	                            </property>
+	                        </bean>
+	                    </entry>
+
+	                </map>
+            	</property>
+
+                <property name="validators">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                 <entry key="FLEXI_STR:SAPDate">
+                                    <bean class="com.ca.jcs.sap.validator.SAPDateAttributeValueValidator" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                            </map>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="sapConnectionPoolConfig">
+                    <bean class="com.ca.jcs.sap.SAPMetaConnectorConfig.SAPConnectionPoolConfig" lazy-init="default" autowire="default" dependency-check="default">
+                        <!-- "jco.destination.pool_capacity" - Maximum number of idle connections kept open by the destination.
+                             A value of 0 has the effect that there is no connection pooling, i.e. connections will be closed
+                             after each request.  -->
+                        <property name="poolCapacity">
+                            <value>2</value>
+                        </property>
+                        <!-- "jco.destination.peak_limit" - Maximum number of active connections that can be created for a 
+                             destination simultaneously -->
+                        <property name="peakLimit">
+                            <value>6</value>
+                        </property>
+                        <!-- "jco.destination.expiration_time" - Time in ms after that the connections hold by the internal pool can be closed -->
+                        <property name="expirationTime">
+                            <value>600000</value>
+                        </property>
+                        <!-- "jco.destination.expiration_check_period" - Interval in ms with which the timeout checker thread checks the connections in the pool for expiration -->
+                        <property name="expirationCheckPeriod">
+                            <value>60000</value>
+                        </property>
+                        <!-- "jco.destination.max_get_client_time" - Max time in ms to wait for a connection, if the max allowed number of connections is allocated by the application -->
+                        <property name="maxGetClientTime">
+                            <value>60000</value>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                <entry key="FLEXI_STR:SAPDate">
+                                    <bean class="com.ca.jcs.sap.converter.SAPDateAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                            </map>
+                        </property>
+                        <!-- enable the functionality that convert the multi-valued attributes to String arrays -->
+                        <property name="propertyPluginConfigs">
+                            <list>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.converter.meta.BoolPropertyConverter</value>
+                                    </property>
+                                    <property name="pluginConfig">
+                                        <bean class="com.ca.jcs.converter.meta.BoolPropertyConverter$BoolConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                            <property name="activeByDefault">
+                                                <value>true</value>
+                                            </property>
+                                            <property name="numeric">
+                                                <value>false</value>
+                                            </property>
+                                            <property name="order">
+                                                <value>100</value>
+                                            </property>
+                                        </bean>
+                                    </property>
+                                </bean>
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <!-- todo have deactivate validators like "required". -->
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+                
+                <property name="caseSensitive">
+                    <value>true</value>
+                </property>
+
+				<!-- From SAP Basis version 700, SAP user passwords become case-sensitive (SAP Note 862989).
+				     These are observed behavior:
+				     1) SAP GUI always converts password to upper case when talking to a SAP 4.6C system but the
+				     SAP BAPI does not do the conversion when talking to SAP 4.6C. So, when you set the password using BAPI and your
+				     password contains at least one lower case letter, you won't be able to log on with that password through SAP GUI.
+				     2) With SAP basis version 640, the password is case insensitive. So, it does not matter what cases you password
+				     letters are when setting the password or using the password to log on through SAP GUI.
+				     3) With SAP basis version 700 and above, password is case sensitive
+				     In the connector code, we will convert the password to all upper case when the SAP basis version is lower that
+				     700. When the SAP basis version is equal to or higher than 700, we will just pass the password through.
+				     This flag, when set to false, will tell the connector code not to do any password conversion even when
+				     the SAP basis version is lower than 700. When SAP basis version is equal to or higher than 700, this flag will
+				     be ignored.
+				     When you enter password to acquire the endpoint, you will need to know the SAP basis version you want to acquire
+				     and enter your password accordingly.
+				     1) For SAP 4.6C, enter password in all upper case letters.
+				     2) For SAP basis version 640, you can enter password in whatever cases you like.
+				     3) For SAP basis version 700 and above, passwords are case-sensitive.
+				-->
+                <property name="convertPasswordToUpperCase">
+                    <value>true</value>
+                </property>
+
+				<!-- this is the map for the help value description when a SAP table read is returned as
+				help values. NOTE - THE SPACES DO MATTER HERE -->
+                <property name="helpValueDescription">
+                    <list>
+                        <!-- table PAT03 -->
+                     	<map>
+                 			<entry key="TABNAME">  	<value>PAT03                         </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>PATCH                         </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0001</value>
+</entry>
+				            <entry key="OFFSET">	<value>000000</value>
+</entry>
+				            <entry key="LENG">		<value>000020</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Support Package name                                        </value>
+</entry>
+				            <entry key="REPTEXT">	<value>Support Package name                                   </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Package   </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Support Package name</value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Support Package name                    </value>
+</entry>
+                    	</map>
+                    	<!-- table TSAD2 -->
+                     	<map>
+                 			<entry key="TABNAME">  	<value>TSAD2                         </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>CLIENT                        </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0001</value>
+</entry>
+				            <entry key="OFFSET">	<value>000000</value>
+</entry>
+				            <entry key="LENG">		<value>000003</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Client                                                      </value>
+</entry>
+				            <entry key="REPTEXT">	<value>Client                                                 </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Client    </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Client              </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Client                                  </value>
+</entry>
+                    	</map>
+                     	<map>
+                 			<entry key="TABNAME">  	<value>TSAD2                         </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>TITLE_KEY                     </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0002</value>
+</entry>
+				            <entry key="OFFSET">	<value>000003</value>
+</entry>
+				            <entry key="LENG">		<value>000004</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Academic title: key                                         </value>
+</entry>
+				            <entry key="REPTEXT">	<value>                                                       </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Key       </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Key                 </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Academic title: key                     </value>
+</entry>
+                    	</map>
+                     	<map>
+                 			<entry key="TABNAME">  	<value>TSAD2                         </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>TITLE_TEXT                    </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0003</value>
+</entry>
+				            <entry key="OFFSET">	<value>000007</value>
+</entry>
+				            <entry key="LENG">		<value>000020</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Academic title: written form                                </value>
+</entry>
+				            <entry key="REPTEXT">	<value>                                                       </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Acad title</value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Acad. title         </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Academic title                          </value>
+</entry>
+                    	</map>
+                    	<!-- table TSAD2T this is the table that contains the description of values in table TSAD2 in different languages -->
+                     	<map>
+                 			<entry key="TABNAME">  	<value>TSAD2T                        </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>TITLE_DSCR                    </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0004</value>
+</entry>
+				            <entry key="OFFSET">	<value>000027</value>
+</entry>
+				            <entry key="LENG">		<value>000040</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Academic title description                                  </value>
+</entry>
+				            <entry key="REPTEXT">	<value>Description                                            </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Desc      </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Description         </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Academic title description              </value>
+</entry>
+
+				            <entry key="DESC_KEY_NAME">
+<value>TITLE_KEY</value>
+</entry>
+				            <entry key="DESC_KEY_OFFSET">
+<value>4</value>
+</entry>
+				            <entry key="DESC_KEY_LENGTH">
+<value>4</value>
+</entry>
+				            <entry key="DESC_VALUE_OFFSET">
+<value>8</value>
+</entry>
+				            <entry key="DESC_VALUE_LENGTH">
+<value>40</value>
+</entry>
+				            <entry key="DESC_LANGU_OFFSET">
+<value>3</value>
+</entry>
+                    	</map>
+                    	<!-- table TSAD5 -->
+                     	<map>
+                 			<entry key="TABNAME">  	<value>TSAD5                         </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>CLIENT                        </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0001</value>
+</entry>
+				            <entry key="OFFSET">	<value>000000</value>
+</entry>
+				            <entry key="LENG">		<value>000003</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Client                                                      </value>
+</entry>
+				            <entry key="REPTEXT">	<value>Client                                                 </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Client    </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Client              </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Client                                  </value>
+</entry>
+                    	</map>
+                    	<map>
+                 			<entry key="TABNAME">  	<value>TSAD5                         </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>TITLE_KEY                     </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0002</value>
+</entry>
+				            <entry key="OFFSET">	<value>000003</value>
+</entry>
+				            <entry key="LENG">		<value>000004</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Name supplement, e.g. noble title (key)                     </value>
+</entry>
+				            <entry key="REPTEXT">	<value>                                                       </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Noble titl</value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Noble title         </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Name supplement, e.g. noble title (key) </value>
+</entry>
+                    	</map>
+                    	<map>
+                 			<entry key="TABNAME">  	<value>TSAD5                         </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>TITLE_TEXT                    </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0003</value>
+</entry>
+				            <entry key="OFFSET">	<value>000007</value>
+</entry>
+				            <entry key="LENG">		<value>000020</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Name supplement, e.g. noble title (written form)            </value>
+</entry>
+				            <entry key="REPTEXT">	<value>                                                       </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Noble titl</value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Noble title         </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Name supplement, e.g. noble title (text)</value>
+</entry>
+                    	</map>
+                    	<!-- table TSAD5T this is the table that contains the description of values in table TSAD5 in different languages -->
+                    	<map>
+                 			<entry key="TABNAME">  	<value>TSAD5T                        </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>TITLE_DSCR                    </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0004</value>
+</entry>
+				            <entry key="OFFSET">	<value>000027</value>
+</entry>
+				            <entry key="LENG">		<value>000040</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Name suffix/noble title description                         </value>
+</entry>
+				            <entry key="REPTEXT">	<value>                                                       </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Desc      </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Description         </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Name suffix/noble title description     </value>
+</entry>
+
+				            <entry key="DESC_KEY_NAME">
+<value>TITLE_KEY</value>
+</entry>
+				            <entry key="DESC_KEY_OFFSET">
+<value>4</value>
+</entry>
+				            <entry key="DESC_KEY_LENGTH">
+<value>4</value>
+</entry>
+				            <entry key="DESC_VALUE_OFFSET">
+<value>8</value>
+</entry>
+				            <entry key="DESC_VALUE_LENGTH">
+<value>40</value>
+</entry>
+				            <entry key="DESC_LANGU_OFFSET">
+<value>3</value>
+</entry>
+                    	</map>
+                    	<!-- table USZBVLNDRC -->
+                    	<map>
+                 			<entry key="TABNAME">  	<value>USZBVLNDRC                    </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>CLIENT                        </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0001</value>
+</entry>
+				            <entry key="OFFSET">	<value>000000</value>
+</entry>
+				            <entry key="LENG">		<value>000003</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Client                                                      </value>
+</entry>
+				            <entry key="REPTEXT">	<value>                                                       </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Client    </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Client              </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Client                                  </value>
+</entry>
+                    	</map>
+                    	<map>
+                 			<entry key="TABNAME">  	<value>USZBVLNDRC                    </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>MODEL                         </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0002</value>
+</entry>
+				            <entry key="OFFSET">	<value>000003</value>
+</entry>
+				            <entry key="LENG">		<value>000010</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>View of ALE model                                           </value>
+</entry>
+				            <entry key="REPTEXT">	<value>                                                       </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Model     </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Model               </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Model                                   </value>
+</entry>
+                    	</map>
+                    	<map>
+                 			<entry key="TABNAME">  	<value>USZBVLNDRC                    </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>RCVSYSTEM                     </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0003</value>
+</entry>
+				            <entry key="OFFSET">	<value>000013</value>
+</entry>
+				            <entry key="LENG">		<value>000010</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Receiving system for central user administration            </value>
+</entry>
+				            <entry key="REPTEXT">	<value>                                                       </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>Rcvsystem </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>Rcvsystem           </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>Rcvsystem                               </value>
+</entry>
+                    	</map>
+                    	<map>
+                 			<entry key="TABNAME">  	<value>USZBVLNDRC                    </value>
+</entry>
+				            <entry key="FIELDNAME">	<value>SYSNAME                       </value>
+</entry>
+				            <entry key="LANGU">		<value>E</value>
+</entry>
+				            <entry key="POSITION">	<value>0004</value>
+</entry>
+				            <entry key="OFFSET">	<value>000023</value>
+</entry>
+				            <entry key="LENG">		<value>000008</value>
+</entry>
+				            <entry key="FIELDTEXT">	<value>Name of the SAP System                                      </value>
+</entry>
+				            <entry key="REPTEXT">	<value>                                                       </value>
+</entry>
+				            <entry key="SCRTEXT_S">	<value>System ID </value>
+</entry>
+				            <entry key="SCRTEXT_M">	<value>System ID           </value>
+</entry>
+				            <entry key="SCRTEXT_L">	<value>System ID                               </value>
+</entry>
+                    	</map>
+                    </list>
+                </property>
+
+            </bean>
+</property>
+</bean>
+</beans>

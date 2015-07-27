@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-lazy-init="false" default-autowire="no" default-dependency-check="none">
+
+    <bean class="com.ca.jcs.ImplBundle" parent="acf2acfesageImplBundle">
+<property name="defaultConnectorConfig">
+<bean class="com.ca.jcs.acf2acfesage.Acf2AcfesageMetaConnectorConfig" lazy-init="default" autowire="default" dependency-check="default">
+            
+				<!-- Note: Commenting out static setting is a useful speed-up when testing as allows
+		            new metadata / opbindings script to be installed with simple LDAP MODIFY of eTMetaData or
+		            eTOpBindingsMetaData on the Connector Type (aka Namespace).
+		            Once testing is complete you may want to consider saving final metadata and scripts (in the opbindings metadata) to a file under revision control and
+		            then set this flag to false to lock the connector down.
+						
+					NOTE: make sure you understand the implications of setting to true in production
+					-->
+				<property name="allowMetadataModify">
+		            <value>true</value>
+		        </property>
+        
+                <!--<property name="jndiEnv">
+                     Any values set here override defaults in the code 
+                    <map>
+                        <entry key="java.naming.factory.initial">
+                            <value>com.sun.jndi.ldap.LdapCtxFactory</value>
+                        </entry>
+                    </map>
+                </property>
+                -->
+                <!-- Maximum time in seconds allocated to each transaction in seconds = 10 mins -->
+                <property name="transactionTimeout">
+                    <value>600</value>
+                </property>
+                <!-- Maximum time in seconds allocated to search transactions in seconds = 24 hrs -->
+                <property name="searchTimeout">
+                    <value>86400</value>
+                </property>
+
+                <property name="failOnUnknownAttrIds">
+                    <value>false</value>
+                </property>
+
+                <property name="validateToConnector">
+                    <value>true</value>
+                </property>
+
+                <property name="validateFromConnector">
+                    <value>false</value>
+                </property>
+
+                <property name="caseSensitive">
+                    <value>true</value>
+                </property>
+                
+                <property name="searchExpensiveAttrs">
+                    <value>true</value>
+                </property>
+
+				<property name="recordTranslators">
+                   	<map> <!-- translators must implement com.ca.jcs.acf2acfesage.RecordTranslator -->
+               			<entry key="ASCII">
+<bean class="com.ca.jcs.acf2acfesage.AsciiRecordTranslator" lazy-init="default" autowire="default" dependency-check="default"/>
+</entry>
+               		</map>
+				</property>
+				
+                <property name="converters">
+                    <bean class="com.ca.jcs.cfg.MetaPluginConfigSuite" lazy-init="default" autowire="default" dependency-check="default">
+                        <property name="typeToPluginMap">
+                            <map>
+                                <entry key="DATE">
+                                    <!--
+                                        Handle case where property is mapped to fixed-length CHAR column in database. 
+                                        DATETIME and TIME converters also do this internally.
+                                    -->
+<!--                                    <bean class="com.ca.jcs.converter.attr.TrimAttributeConverter" />-->
+                                    <bean class="com.ca.jcs.converter.attr.XMLSQLDateTimeAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+                                <entry key="DATETIME">
+                                    <bean class="com.ca.jcs.converter.attr.XMLSQLDateTimeAttributeConverter" lazy-init="default" autowire="default" dependency-check="default"/>
+                                </entry>
+<!--                                <entry key="TIME">-->
+<!--                                    <bean class="com.ca.jcs.converter.attr.XMLSQLTimeAttributeConverter" />-->
+<!--                                </entry>-->
+                                <entry key="FLEXI_STR:quoteless">
+                                    <bean class="com.ca.jcs.converter.attr.RegexAttributeConverter" lazy-init="default" autowire="default" dependency-check="default">
+                                        <!-- style -->
+                                        <constructor-arg>
+                                            <value>perl5</value>
+                                        </constructor-arg>
+                                        <!-- regex -->
+                                        <constructor-arg>
+                                            <value>s/'//g</value>
+                                        </constructor-arg>
+                                    </bean>
+                                </entry>
+                            </map>
+                        </property>
+
+                        <property name="propertyPluginConfigs">
+                            <list>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.converter.meta.BoolPropertyConverter</value>
+                                    </property>
+                                    <property name="pluginConfig">
+                                        <bean class="com.ca.jcs.converter.meta.BoolPropertyConverter$BoolConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                            <property name="activeByDefault">
+                                                <value>false</value>
+                                            </property>
+                                            <property name="numeric">
+                                                <value>true</value>
+                                            </property>
+                                            <property name="order">
+                                                <value>100</value>
+                                            </property>
+                                        </bean>
+                                    </property>
+                                    <property name="metadataPropNames">
+                                        <list>
+                                            <value>isStoreNumeric</value>
+                                        </list>
+                                    </property>
+                                </bean>
+                                <!--<bean class="com.ca.jcs.cfg.MetaPluginConfig">-->
+                                <!--<property name="pluginClass">-->
+                                <!--<value>com.ca.jcs.converter.meta.JavaObjectPropertyConverter</value>-->
+                                <!--</property>-->
+                                <!--<property name="pluginConfig">-->
+                                <!--<bean class="com.ca.jcs.converter.meta.ConverterConfig">-->
+                                <!--<property name="activeByDefault"><value>true</value></property>-->
+                                <!--<property name="order"><value>200</value></property>-->
+                                <!--</bean>-->
+                                <!--</property>-->
+                                <!--
+                                    Specifying no metadata property names 
+                                    means checked against all properties, 
+                                    where plug-in constructor decides on relevance
+                                -->
+                                <!--</bean>-->
+                            </list>
+                        </property>
+                        <property name="classPluginConfigs">
+                            <list>
+                                <bean class="com.ca.jcs.cfg.MetaPluginConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                    <property name="pluginClass">
+                                        <value>com.ca.jcs.converter.meta.NullValueClassConverter</value>
+                                    </property>
+                                    <property name="pluginConfig">
+                                        <bean class="com.ca.jcs.converter.meta.NullValueClassConverter$NullValueConverterConfig" lazy-init="default" autowire="default" dependency-check="default">
+                                            <property name="nullValue">
+                                                <!-- default replacement for null values is a single space character -->
+                                                <value>
+                                                </value>
+                                            </property>
+                                        </bean>
+                                    </property>
+                                    <property name="metadataPropNames">
+                                        <list>
+                                            <value>useSpecialNullValue</value>
+                                        </list>
+                                    </property>
+                                </bean>
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+
+                <property name="dataSourceFactory">
+                    <bean class="com.ca.jdbc.DataSourceClassFactory" lazy-init="default" autowire="default" dependency-check="default"/>
+                </property>
+                <property name="dataSourceConfigProps">
+                    <props>
+                        <!--
+                            refer to http://jakarta.apache.org/commons/dbcp/configuration.html 
+                            for complete list and documentation of available configuration parameters
+                        -->
+
+                        <prop key="connectionProperties">fixedString=true</prop>
+                        <!-- The maximum number of active connections that can be allocated from this
+                            pool at the same time, or negative for no limit. -->
+                        <!-- <prop key="maxActive">20</prop>-->
+                        <prop key="maxActive">-1</prop>
+
+                        <!--
+                            The minimum number of connections that can remain idle in the pool, 
+                            without extra ones being created, or zero to create none. 
+                            Best to create it on demand instead.
+                        -->
+                        <!--<prop key="minIdle">1</prop>-->
+
+                        <!--
+                            The maximum number of connections that can remain idle in the pool, 
+                            without extra ones being released, or negative for no limit.
+                        -->
+                        <!-- <prop key="maxIdle">4</prop> -->
+                        <prop key="maxIdle">-1</prop>
+
+                        <!-- The maximum number of milliseconds to wait for connection to be returned to the pool. -->
+                        <!--<prop key="maxWait">-1</prop>-->
+
+                        <!--
+                            The minimum amount of time an object may sit idle in the pool 
+                            before it is eligable for eviction. 10 * 60 * 1000 = 10 minutes
+                        -->
+                        <prop key="minEvictableIdleTimeMillis">600000</prop>
+                        <!-- The number of milliseconds to sleep between runs of the idle object evictor thread.
+                                1 * 60 * 1000 = 2 minutes -->
+                        <prop key="timeBetweenEvictionRunsMillis">60000</prop>
+                    </props>
+                </property>
+
+            </bean>
+</property>
+</bean>
+
+</beans>
