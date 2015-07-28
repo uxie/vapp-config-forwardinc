@@ -1,6 +1,6 @@
 {
   "id": "im-12-6-06-ga-forwardinc",
-  "name": "CA Identity Manager 12.6.06.ga ForwardInc",
+  "name": "CA Identity Manager 12.6.06.ga forwardinc",
   "replicationControllerList": {
     "items": [
       {
@@ -41,7 +41,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -60,7 +60,7 @@
                       "value": "forwardinc/mysql"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/mysql:latest",
+                  "image": "store.vapp-security.solutions/imag/mysql:12.6.06.GA",
                   "name": "database",
                   "ports": [
                     {
@@ -127,7 +127,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -146,14 +146,7 @@
                       "value": "forwardinc/appsrv"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/im-server:12.6.06.ga",
-                  "livenessProbe": {
-                    "httpGet": {
-                      "path": "/iam/im/forwardinc",
-                      "port": 8080
-                    },
-                    "initialDelaySeconds": 1200
-                  },
+                  "image": "store.vapp-security.solutions/imag/im-server:12.6.06.GA",
                   "name": "im-server",
                   "ports": [
                     {
@@ -230,7 +223,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -253,7 +246,7 @@
                   "name": "userstore",
                   "ports": [
                     {
-                      "containerPort": 19389
+                      "containerPort": 13389
                     }
                   ],
                   "volumeMounts": [
@@ -316,7 +309,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -411,7 +404,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -430,7 +423,7 @@
                       "value": "forwardinc/provsrv"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/im-prov-server:12.6.06.ga",
+                  "image": "store.vapp-security.solutions/imag/im-prov-server:12.6.06.GA",
                   "name": "provsrv",
                   "ports": [
                     {
@@ -483,7 +476,7 @@
           "template": {
             "metadata": {
               "annotations": {
-                "description": "CA Connector Server Pod"
+                "description": "CA connector Server Pod"
               },
               "labels": {
                 "ca.com/im": "connserver"
@@ -501,7 +494,7 @@
                     },
                     {
                       "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/master.zip"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -520,7 +513,7 @@
                       "value": "forwardinc/jcs"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/connector-server:12.6.06.ga",
+                  "image": "store.vapp-security.solutions/imag/connector-server:12.6.06.GA",
                   "name": "connserver",
                   "ports": [
                     {
@@ -645,8 +638,8 @@
         "spec": {
           "ports": [
             {
-              "port": 19389,
-              "targetPort": 19389
+              "port": 13389,
+              "targetPort": 13389
             }
           ],
           "selector": {
