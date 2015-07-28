@@ -134,10 +134,11 @@ _checkConnSrvConn()
 
 	jcshost="${jcshost%"${jcshost##*[![:space:]]}"}"
 	jcsport="${jcsport%"${jcsport##*[![:space:]]}"}"
-
+echo $jcshost
+echo $jcsport
         while [ "$i" -le "$TIME_OUT" ]; do
                 _print_and_log "checking connection ..."
-		curl -u uid=admin,ou=system:firewall "ldap://$jcshost:$jcsport"
+		curl -u uid=admin,ou=system:HelloWorld "ldap://$jcshost:$jcsport"
                 if [ $? -eq 0 ]; then
                         _print_and_log "[Connector Server Host - $jcsport:$jcsport]"
                         _print_and_log "[Success]"
