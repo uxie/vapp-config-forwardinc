@@ -146,7 +146,7 @@
                       "value": "forwardinc/appsrv"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/im-server:12.6.06.ga",
+                  "image": "store.vapp-security.solutions/imag/im-server:12.6.06.GA",
                   "name": "im-server",
                   "ports": [
                     {
@@ -423,7 +423,7 @@
                       "value": "forwardinc/provsrv"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/im-prov-server:12.6.06.ga",
+                  "image": "store.vapp-security.solutions/imag/im-prov-server:12.6.06.GA",
                   "name": "provsrv",
                   "ports": [
                     {
@@ -513,7 +513,7 @@
                       "value": "forwardinc/jcs"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/connector-server:12.6.06.ga",
+                  "image": "store.vapp-security.solutions/imag/connector-server:12.6.06.GA",
                   "name": "connserver",
                   "ports": [
                     {
