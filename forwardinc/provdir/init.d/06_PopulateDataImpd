@@ -1,3 +1,5 @@
+mkdir -p $DXHOME/data
+echo "Creation of Data Folder done..."
 IMPD_DATA_FLDR_CO=$DXHOME/data/${HOSTNAME}-impd-co
 IMPD_DATA_FLDR_INC=$DXHOME/data/${HOSTNAME}-impd-inc
 IMPD_DATA_FLDR_MAIN=$DXHOME/data/${HOSTNAME}-impd-main

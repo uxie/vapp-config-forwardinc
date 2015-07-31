@@ -9,8 +9,8 @@ cp $LDIF_FILE $LDIF_NEW_FILE
 #replacing the place holder in impd-main ldif
 #######################################################################
 
-db_size=`$DXHOME/parser.sh DXGRID_DB_SIZE $PROP_FILE`
-impd_passwd=`$DXHOME/parser.sh IM_PD_PASSWORD $PROP_FILE`
+db_size=$(grep -Po "(?<=^DXGRID_DB_SIZE=).*" $PROP_FILE)
+impd_passwd=$(grep -Po "(?<=^IM_PD_PASSWORD=).*" $PROP_FILE)
 impd_passwd="${impd_passwd%"${impd_passwd##*[![:space:]]}"}"
 
 sed -i "s/@passwd@/$impd_passwd/g" $LDIF_NEW_FILE 

@@ -4,9 +4,12 @@
 #######################################################################
 
 find $DXHOME/config -type f -exec sed -i -e "s/@hostname@/$HOSTNAME/g" {} \;
-find $DXHOME/config -type f -name "template*" | while read -r file;
+echo "hostname substitution done..."
 
+find $DXHOME/config -type f -name "template*" | while read -r file
 do
-	echo "`date -u` [DEBUG] CA Directory - Renaming template file [$file] to [${file//template/$HOSTNAME}]"
-    mv "$file" "${file//template/$HOSTNAME}"
+  echo  "$file"
+  target=$(echo $file | sed -e "s/template/$HOSTNAME/g")
+  mv $file $target
 done
+
