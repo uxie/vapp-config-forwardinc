@@ -601,6 +601,7 @@
             "description": "Public service of the IM UI",
             "ca.com/cluster-public-hostname": "forwardinc.ca.local",
             "ca.com/cluster-public-url": "/iam/im/forwardinc",
+            "ca.com/cluster-public-urltext": "ForwardInc Environment",
             "ca.com/cluster-public-urlpath": "/iam/im",
             "ca.com/cluster-public-urlpath-backend": "/iam/im"
           },
