@@ -628,6 +628,34 @@
         "apiVersion": "v1beta3",
         "metadata": {
           "annotations": {
+            "description": "Public service CA Style r5.1.1",
+            "ca.com/cluster-public-urlpath": "/castylesr5.1.1",
+            "ca.com/cluster-public-urlpath-backend": "/castylesr5.1.1"
+          },
+          "labels": {
+            "ca.com/cluster-public-service": "http"
+          },
+          "name": "castyle",
+          "namespace": "im-12-6-06-ga-forwardinc"
+        },
+        "spec": {
+          "ports": [
+            {
+              "name": "ui",
+              "port": 80,
+              "targetPort": 8080
+            }
+          ],
+          "selector": {
+            "ca.com/im": "im-server"
+          },
+          "sessionAffinity": "ClientIP"
+        }
+      },
+      {
+        "apiVersion": "v1beta3",
+        "metadata": {
+          "annotations": {
             "description": "Private userstore service"
           },
           "labels": {
