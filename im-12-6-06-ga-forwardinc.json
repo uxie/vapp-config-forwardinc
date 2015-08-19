@@ -60,7 +60,7 @@
                       "value": "forwardinc/mysql"
                     }
                   ],
-                  "image": "store.vapp-security.solutions/imag/mysql:latest",
+                  "image": "store.vapp-security.solutions/vapp/mysql:latest",
                   "name": "database",
                   "ports": [
                     {
