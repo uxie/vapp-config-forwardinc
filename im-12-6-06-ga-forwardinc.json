@@ -4,7 +4,7 @@
   "replicationControllerList": {
     "items": [
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "IM Database Replication Controller"
@@ -36,12 +36,12 @@
                 {
                   "env": [
                     {
-                      "name": "DESTINATION",
-                      "value": "/solution"
+                      "name": "SOURCE",
+                      "value": "https://github.com/imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     },
                     {
-                      "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "name": "DESTINATION",
+                      "value": "/solution"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -90,7 +90,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "IM Server Replication Controller"
@@ -122,12 +122,12 @@
                 {
                   "env": [
                     {
-                      "name": "DESTINATION",
-                      "value": "/solution"
+                      "name": "SOURCE",
+                      "value": "https://github.com/imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     },
                     {
-                      "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "name": "DESTINATION",
+                      "value": "/solution"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -186,7 +186,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "CA Directory Userstore Replication Controller"
@@ -218,12 +218,12 @@
                 {
                   "env": [
                     {
-                      "name": "DESTINATION",
-                      "value": "/solution"
+                      "name": "SOURCE",
+                      "value": "https://github.com/imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     },
                     {
-                      "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "name": "DESTINATION",
+                      "value": "/solution"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -272,7 +272,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "CA Directory Provdir Replication Controller"
@@ -304,12 +304,12 @@
                 {
                   "env": [
                     {
-                      "name": "DESTINATION",
-                      "value": "/solution"
+                      "name": "SOURCE",
+                      "value": "https://github.com/imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     },
                     {
-                      "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "name": "DESTINATION",
+                      "value": "/solution"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -367,7 +367,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "CA Provisioning Server Replication Controller"
@@ -399,12 +399,12 @@
                 {
                   "env": [
                     {
-                      "name": "DESTINATION",
-                      "value": "/solution"
+                      "name": "SOURCE",
+                      "value": "https://github.com/imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     },
                     {
-                      "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "name": "DESTINATION",
+                      "value": "/solution"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -457,7 +457,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "CA Connector Server Replication Controller"
@@ -476,7 +476,7 @@
           "template": {
             "metadata": {
               "annotations": {
-                "description": "CA connector Server Pod"
+                "description": "CA Connector Server Pod"
               },
               "labels": {
                 "ca.com/im": "connserver"
@@ -489,12 +489,12 @@
                 {
                   "env": [
                     {
-                      "name": "DESTINATION",
-                      "value": "/solution"
+                      "name": "SOURCE",
+                      "value": "https://github.com/imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
                     },
                     {
-                      "name": "SOURCE",
-                      "value": "https://github.com/ca-imag/vapp-config-forwardinc/archive/12.6.06.ga.zip"
+                      "name": "DESTINATION",
+                      "value": "/solution"
                     }
                   ],
                   "image": "store.vapp-security.solutions/vapp/sidecar-configsvc:latest",
@@ -571,7 +571,7 @@
   "serviceList": {
     "items": [
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "Private database service"
@@ -595,7 +595,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "Public service of the IM UI",
@@ -625,7 +625,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "Public service CA Style r5.1.1",
@@ -653,7 +653,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "Private userstore service"
@@ -677,7 +677,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "Private provdir service"
@@ -707,7 +707,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "Private provsrv service"
@@ -737,7 +737,7 @@
         }
       },
       {
-        "apiVersion": "v1beta3",
+        "apiVersion": "v1",
         "metadata": {
           "annotations": {
             "description": "Private connserver service"
