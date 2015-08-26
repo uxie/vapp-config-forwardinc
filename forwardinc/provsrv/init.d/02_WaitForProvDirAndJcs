@@ -37,9 +37,9 @@ _checkProvDirConn()
 {
 
 	 _print_and_log "[Checking Provisioning Directory]"
-	provhost=`$HOMEDIR/parser.sh IM_PD_HOST $PROV_PROP_FILE`
-	provport=`$HOMEDIR/parser.sh IM_PD_ROUTER_PORT $PROV_PROP_FILE`
-	provpasswd=`$HOMEDIR/parser.sh IM_PD_PASSWORD $PROV_PROP_FILE`
+	provhost=$(grep -Po "(?<=^IM_PD_HOST=).*" $PROV_PROP_FILE)
+	provport=$(grep -Po "(?<=^IM_PD_ROUTER_PORT=).*" $PROV_PROP_FILE)
+	provpasswd=$(grep -Po "(?<=^IM_PD_PASSWORD=).*" $PROV_PROP_FILE)
 	
 
 	provhost="${provhost%"${provhost##*[![:space:]]}"}"
@@ -74,8 +74,8 @@ _checkConnSrvConn()
 {
 
          _print_and_log "[Checking Java Connector Server]"
-        jcshost=`$HOMEDIR/parser.sh IM_CONNECTOR_SERVER $PROV_PROP_FILE`
-        jcsport=`$HOMEDIR/parser.sh IM_CONNECTOR_SERVER_LDAP_PORT $PROV_PROP_FILE`
+        jcshost=$(grep -Po "(?<=^IM_CONNECTOR_SERVER=).*" $PROV_PROP_FILE)
+		jcsport=$(grep -Po "(?<=^IM_CONNECTOR_SERVER_LDAP_PORT=).*" $PROV_PROP_FILE)
 
         jcshost="${jcshost%"${jcshost##*[![:space:]]}"}"
         jcsport="${jcsport%"${jcsport##*[![:space:]]}"}"

@@ -20,5 +20,6 @@
 # * ----------------------------------------------------------------------
 
 # Copying the my.cnf file and changing the permission
-/bin/cp -f /solution/$CONFIG/data/my.cnf  $MYSQL_CONF_DIR/
-/bin/chmod 644 $MYSQL_CONF_DIR/my.cnf
+echo "Copying of the my.cnf to /etc/mysql folder ...."
+/bin/cp -f /solution/$CONFIG/data/my.cnf  /etc/mysql/my.cnf
+/bin/chmod 644 /etc/mysql/my.cnf
